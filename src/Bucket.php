@@ -7,7 +7,7 @@ class Bucket extends \ArrayObject implements BucketInterface {
     public function add( HookInterface $hook ) {
         $id = $hook->getId();
         if ( is_string( $id ) && ! empty( $id ) ) {
-            $this->offsetSet( $hook->getId(), $hook );
+            $this->offsetSet( $id, $hook );
         }
         return $hook;
     }
