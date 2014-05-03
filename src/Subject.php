@@ -10,12 +10,12 @@ class Subject implements SubjectInterface, \SplSubject {
 
     protected $hooks;
 
-    protected $filter;
+    protected $filter = FALSE;
 
     protected $context;
 
     function __construct( BucketInterface $bucket ) {
-        $this->hooks = new $bucket;
+        $this->hooks = $bucket;
         $this->context = new \ArrayObject;
     }
 
@@ -30,25 +30,31 @@ class Subject implements SubjectInterface, \SplSubject {
     }
 
     public function attach( \SplObserver $hook ) {
+        if ( ! $hook instanceof HookInterface ) {
+            throw new \InvalidArgumentException;
+        }
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
             $debug = debug_backtrace( 0, 7 );
             $hook->set( 'debug', array_slice( $debug, 2 ) );
         }
-        return $this->hooks->add( $this->add( $hook ) );
+        return $this->getHooks()->add( $this->add( $hook ) );
     }
 
     public function detach( \SplObserver $hook ) {
-        $this->hooks->remove( $this->remove( $hook ) );
+        if ( ! $hook instanceof HookInterface ) {
+            throw new \InvalidArgumentException;
+        }
+        return $this->getHooks()->remove( $this->remove( $hook ) );
     }
 
     public function add( HookInterface $hook ) {
-        $cb = $this->isFilter() ? 'add_filter' : 'add_action';
+        $cb = $this->isFilter() ? '\add_filter' : '\add_action';
         call_user_func_array( $cb, $this->getHookArgs( $hook ) );
         return $hook;
     }
 
     public function remove( HookInterface $hook ) {
-        $cb = $this->isFilter() ? 'remove_filter' : 'remove_action';
+        $cb = $this->isFilter() ? '\remove_filter' : '\remove_action';
         call_user_func_array( $cb, $this->getHookArgs( $hook ) );
         return $hook;
     }
@@ -56,7 +62,7 @@ class Subject implements SubjectInterface, \SplSubject {
     public function notify() {
         $args = $this->getArgs();
         array_unshift( $args, $this->getId() );
-        $cb = $this->isFilter() ? 'apply_filters' : 'do_action';
+        $cb = $this->isFilter() ? '\apply_filters' : '\do_action';
         $result = call_user_func_array( $cb, $this->getArgs() );
         if ( $this->isFilter() ) {
             return $result;
@@ -64,19 +70,19 @@ class Subject implements SubjectInterface, \SplSubject {
     }
 
     public function detachAll() {
-        foreach ( $this->hooks as $hook ) {
+        foreach ( $this->getHooks() as $hook ) {
             $this->detach( $hook );
         }
     }
 
     public function removeAll() {
-        foreach ( $this->hooks as $hook ) {
+        foreach ( $this->getHooks() as $hook ) {
             $this->remove( $hook );
         }
     }
 
     public function restoreAll() {
-        foreach ( $this->hooks as $hook ) {
+        foreach ( $this->getHooks() as $hook ) {
             if ( $hook instanceof HookInterface ) {
                 $this->add( $hook );
             }
@@ -100,7 +106,7 @@ class Subject implements SubjectInterface, \SplSubject {
     }
 
     public function getHook( $id ) {
-        return $this->hooks->get( $id );
+        return $this->getHooks()->get( $id );
     }
 
     public function setArgs( Array $args ) {
@@ -124,11 +130,17 @@ class Subject implements SubjectInterface, \SplSubject {
         }
     }
 
-    public function setContext( $index, $value = NULL ) {
-        if ( ! is_string( $index ) || empty( $index ) ) {
+    public function setContext( $index = NULL, $value = NULL ) {
+        if ( ! is_null( $index ) && ( ! is_string( $index ) || empty( $index ) ) ) {
+            throw new \InvalidArgumentException;
+        } elseif ( is_null( $index ) && ! is_null( $value ) ) {
             throw new \InvalidArgumentException;
         }
-        $this->context[$index] = $value;
+        if ( is_null( $index ) ) {
+            $this->context = new \ArrayObject;
+        } else {
+            $this->context[$index] = $value;
+        }
     }
 
     protected function getHookArgs( HookInterface $hook ) {

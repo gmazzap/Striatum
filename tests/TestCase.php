@@ -5,12 +5,12 @@ namespace Brain\Striatum\Tests;
 class TestCase extends \PHPUnit_Framework_TestCase {
 
     public function setUp() {
-        \WP_Mock::setUp();
+        parent::setUp();
     }
 
     public function tearDown() {
-        \WP_Mock::tearDown();
-        \Mockery::close();
+        parent::tearDown();
+        HooksMock::tearDown();
     }
 
 }
