@@ -18,10 +18,6 @@ interface SubjectInterface {
 
     public function getHook( $id );
 
-    public function setArgs( Array $args );
-
-    public function getArgs();
-
     public function isFilter( $set = FALSE );
 
     public function detachAll();

@@ -134,23 +134,26 @@ function unfreezeHooks( $hooks ) {
     }
 }
 
-function trigger( $hook, Array $args = [ ] ) {
+function trigger( $hook ) {
     $hooks = getHooks( $hook, TRUE );
     if ( is_wp_error( $hooks ) ) {
         return $hooks;
     }
+    $all_args = func_get_args();
+    $args = ( func_get_arg( 1 ) ) ? array_slice( $all_args, 1 ) : [ ];
     try {
-        $hooks->setArgs( $args );
-        $result = $hooks->notify();
+        $result = $hooks->notify( $args );
         if ( $hooks->isFilter() ) return $result;
     } catch ( Exception $exc ) {
         if ( $hooks->isFilter() ) return $args[0];
     }
 }
 
-function filter( $hook, $subject = NULL, Array $args = [ ] ) {
+function filter( $hook, $subject = NULL ) {
+    $all_args = func_get_args();
+    $args = ( func_get_arg( 2 ) ) ? array_slice( $all_args, 2 ) : [ ];
     array_unshift( $args, $subject );
-    return trigger( $hook, $args );
+    return trigger( $hook );
 }
 
 function hookHas( $hook, $id ) {

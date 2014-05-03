@@ -60,10 +60,12 @@ class Subject implements SubjectInterface, \SplSubject {
     }
 
     public function notify() {
-        $args = $this->getArgs();
-        array_unshift( $args, $this->getId() );
+        $args = array_values( (array) func_get_arg( 0 ) );
+        if ( $args[0] !== $this->getId() ) {
+            array_unshift( $args, $this->getId() );
+        }
         $cb = $this->isFilter() ? '\apply_filters' : '\do_action';
-        $result = call_user_func_array( $cb, $this->getArgs() );
+        $result = call_user_func_array( $cb, $args );
         if ( $this->isFilter() ) {
             return $result;
         }
@@ -71,13 +73,17 @@ class Subject implements SubjectInterface, \SplSubject {
 
     public function detachAll() {
         foreach ( $this->getHooks() as $hook ) {
-            $this->detach( $hook );
+            if ( $hook instanceof HookInterface ) {
+                $this->detach( $hook );
+            }
         }
     }
 
     public function removeAll() {
         foreach ( $this->getHooks() as $hook ) {
-            $this->remove( $hook );
+            if ( $hook instanceof HookInterface ) {
+                $this->remove( $hook );
+            }
         }
     }
 
@@ -107,14 +113,6 @@ class Subject implements SubjectInterface, \SplSubject {
 
     public function getHook( $id ) {
         return $this->getHooks()->get( $id );
-    }
-
-    public function setArgs( Array $args ) {
-        $this->args = $args;
-    }
-
-    public function getArgs() {
-        return $this->args;
     }
 
     public function isFilter( $set = NULL ) {

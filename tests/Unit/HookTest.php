@@ -99,7 +99,7 @@ class HookTest extends TestCase {
 
     function testProxyReturnFirstParamIfNotCheck() {
         $hook = \Mockery::mock( 'Brain\Striatum\Hook' )->makePartial();
-        $hook->shouldReceive( 'check' )->withNoArgs()->andReturn( FALSE );
+        $hook->shouldReceive( 'check' )->atLeast( 1 )->withNoArgs()->andReturn( FALSE );
         assertEquals( 'foo', $hook->proxy( 'foo' ) );
         assertNull( $hook->proxy() );
     }
@@ -107,9 +107,9 @@ class HookTest extends TestCase {
     function testProxy() {
         $hook = \Mockery::mock( 'Brain\Striatum\Hook' )->makePartial();
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' );
-        $hook->shouldReceive( 'check' )->once()->withNoArgs()->andReturn( TRUE );
-        $hook->shouldReceive( 'getSubject' )->once()->withNoArgs()->andReturn( $subject );
-        $hook->shouldReceive( 'update' )->once()->with( $subject )->andReturn( 'bar' );
+        $hook->shouldReceive( 'check' )->atLeast( 1 )->withNoArgs()->andReturn( TRUE );
+        $hook->shouldReceive( 'getSubject' )->atLeast( 1 )->withNoArgs()->andReturn( $subject );
+        $hook->shouldReceive( 'update' )->atLeast( 1 )->with( $subject )->andReturn( 'bar' );
         assertEquals( 'bar', $hook->proxy( 'baz' ) );
         assertEquals( [ 'baz' ], $hook->getLastArgs() );
     }
@@ -125,11 +125,11 @@ class HookTest extends TestCase {
     function testUpdate() {
         $hook = \Mockery::mock( 'Brain\Striatum\Hook' )->makePartial();
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' );
-        $subject->shouldReceive( 'isFilter' )->once()->withNoArgs()->andReturn( TRUE );
-        $hook->shouldReceive( 'before' )->once()->with( $subject )->andReturn( $hook );
-        $hook->shouldReceive( 'get' )->once()->with( 'callback' )->andReturn( '__return_true' );
-        $hook->shouldReceive( 'getLastArgs' )->once()->withNoArgs()->andReturn( [ ] );
-        $hook->shouldReceive( 'after' )->once()->with( $subject )->andReturn( $hook );
+        $subject->shouldReceive( 'isFilter' )->atLeast( 1 )->withNoArgs()->andReturn( TRUE );
+        $hook->shouldReceive( 'before' )->atLeast( 1 )->with( $subject )->andReturn( $hook );
+        $hook->shouldReceive( 'get' )->atLeast( 1 )->with( 'callback' )->andReturn( '__return_true' );
+        $hook->shouldReceive( 'getLastArgs' )->atLeast( 1 )->withNoArgs()->andReturn( [ ] );
+        $hook->shouldReceive( 'after' )->atLeast( 1 )->with( $subject )->andReturn( $hook );
         assertTrue( $hook->update( $subject ) );
     }
 
@@ -234,8 +234,8 @@ class HookTest extends TestCase {
 
     function testBefore() {
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' );
-        $subject->shouldReceive( 'setContext' )->withAnyArgs()->andReturnNull();
-        $subject->shouldReceive( 'getContext' )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'setContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'getContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
         $hook = new S\Hook;
         $hook->setId( 'foo' )->prepare( [ ] ); // set defaults
         assertEquals( $hook, $hook->before( $subject ) );
@@ -260,8 +260,8 @@ class HookTest extends TestCase {
 
     function testAfter() {
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' );
-        $subject->shouldReceive( 'setContext' )->withAnyArgs()->andReturnNull();
-        $subject->shouldReceive( 'getContext' )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'setContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'getContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
         $hook = new S\Hook;
         $hook->setId( 'foo' )->prepare( [ ] );
         assertEquals( $hook, $hook->after( $subject ) );
@@ -270,8 +270,8 @@ class HookTest extends TestCase {
     function testBeforeDetachIfNeeded() {
         $hook = new S\Hook;
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' );
-        $subject->shouldReceive( 'setContext' )->withAnyArgs()->andReturnNull();
-        $subject->shouldReceive( 'getContext' )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'setContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'getContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
         $subject->shouldReceive( 'detach' )->twice()->with( $hook )->andReturn( 'detached' );
         $hook->setId( 'foo' )->prepare( [ ] )->runOnce();
         $hook->after( $subject ); // increment times count
@@ -281,9 +281,9 @@ class HookTest extends TestCase {
     function testAfterDetachIfNeeded() {
         $hook = new S\Hook;
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' );
-        $subject->shouldReceive( 'setContext' )->withAnyArgs()->andReturnNull();
-        $subject->shouldReceive( 'getContext' )->withAnyArgs()->andReturnNull();
-        $subject->shouldReceive( 'detach' )->twice()->with( $hook )->andReturn( 'detached' );
+        $subject->shouldReceive( 'setContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'getContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'detach' )->atLeast( 1 )->with( $hook )->andReturn( 'detached' );
         $hook->setId( 'foo' )->prepare( [ ] )->runOnce();
         $hook->after( $subject ); // increment times count
         assertEquals( 'detached', $hook->after( $subject ) );

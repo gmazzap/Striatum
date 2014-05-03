@@ -29,16 +29,16 @@ if ( ! function_exists( 'assertFilterAdded' ) ) {
 
 if ( ! function_exists( 'assertActionFired' ) ) {
 
-    function assertActionFired( $hook = '', $callback = NULL ) {
-        Brain\Striatum\Tests\HooksMock::assertActionFired( $hook, $callback );
+    function assertActionFired( $hook = '', $args = NULL ) {
+        Brain\Striatum\Tests\HooksMock::assertActionFired( $hook, $args );
     }
 
 }
 
 if ( ! function_exists( 'assertFilterFired' ) ) {
 
-    function assertFilterFired( $hook = '', $callback = NULL ) {
-        Brain\Striatum\Tests\HooksMock::assertFilterFired( $hook, $callback );
+    function assertFilterFired( $hook = '', $args = NULL ) {
+        Brain\Striatum\Tests\HooksMock::assertFilterFired( $hook, $args );
     }
 
 }

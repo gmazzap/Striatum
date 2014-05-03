@@ -100,7 +100,7 @@ if ( ! function_exists( 'remove_filter' ) ) {
 if ( ! function_exists( 'do_action' ) ) {
 
     function do_action() {
-        Brain\Striatum\Tests\HooksMock::fireHook( 'action', func_get_args() );
+        return Brain\Striatum\Tests\HooksMock::fireHook( 'action', func_get_args() );
     }
 
 }
@@ -108,7 +108,7 @@ if ( ! function_exists( 'do_action' ) ) {
 if ( ! function_exists( 'apply_filters' ) ) {
 
     function apply_filters() {
-        Brain\Striatum\Tests\HooksMock::fireHook( 'filter', func_get_args() );
+        return Brain\Striatum\Tests\HooksMock::fireHook( 'filter', func_get_args() );
     }
 
 }

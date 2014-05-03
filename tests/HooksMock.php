@@ -91,7 +91,7 @@ class HooksMock {
      * @param string $type Type of the hook, 'action' or 'filter'
      * @param array $args Arguments passed to do_action() or apply_filters()
      * @throws Brain\Striatum\Tests\HookException
-     * @return mixed If type is filter return what returnd by added filters.
+     * @return array 3 items array, 1st is the type, 2nd the hook fired, 3rd the arguments
      */
     public static function fireHook( $type = '', $args = [ ] ) {
         if ( ! in_array( $type, [ 'action', 'filter' ], TRUE ) ) $type = 'action';
@@ -106,21 +106,39 @@ class HooksMock {
             $msg = ' Error on adding ' . $type . ': invalid hook';
             throw new HookException( $msg );
         }
-        $value = isset( $args[0] ) ? $args[0] : NULL;
-        if ( ! isset( static::$hooks[$target][$hook] ) ) {
-            return $type === 'filter' ? $value : NULL;
+        if ( ! isset( static::$hooks_done[$type][$hook] ) ) {
+            static::$hooks_done[$target][$hook] = [ ];
         }
-        $hooks = &static::$hooks[$target][$hook];
-        ksort( $hooks );
-        reset( $hooks );
-        do {
-            foreach ( (array) current( $hooks ) as $cbdata ) {
-                $value = static::fireHookCb( $type, $hook, $cbdata, $args, $value );
-            }
-        } while ( next( $hooks ) !== FALSE );
-        if ( $type === 'filter' ) {
-            return $value;
-        }
+        static::$hooks_done[$target][$hook][] = $args;
+        return [ $type, $hook, $args ];
+    }
+
+    /**
+     * Check if an action hook is added. Optionally check a specific callback and and priority.
+     *
+     * @param string $hook Hook to check
+     * @param callable $callback Callback to check
+     * @param int $priority Priority to check
+     * @return boolean
+     * @throws HookException
+     * @uses Brain\Striatum\Tests\HooksMock::hasHook()
+     */
+    public static function hasAction( $hook = '', $callback = NULL, $priority = NULL ) {
+        return static::hasHook( 'action', $hook, $callback, $priority );
+    }
+
+    /**
+     * Check if an filter hook is added. Optionally check a specific callback and and priority.
+     *
+     * @param string $hook Hook to check
+     * @param callable $callback Callback to check
+     * @param int $priority Priority to check
+     * @return boolean
+     * @throws HookException
+     * @uses Brain\Striatum\Tests\HooksMock::hasHook()
+     */
+    public static function hasFilter( $hook = '', $callback = NULL, $priority = NULL ) {
+        return static::hasHook( 'filter', $hook, $callback, $priority );
     }
 
     /**
@@ -198,6 +216,44 @@ class HooksMock {
     }
 
     /**
+     * @param string $type Type of hook, 'action' or 'filter'
+     * @param string $hook Hook to check
+     * @param callable $cb Callback to check
+     * @param int $pri Priority to check
+     * @return boolean
+     * @throws HookException
+     */
+    public static function hasHook( $type = '', $hook = '', $cb = NULL, $pri = NULL ) {
+        if ( ! in_array( $type, [ 'action', 'filter' ], TRUE ) ) $type = 'action';
+        $target = $type === 'filter' ? 'filters' : 'actions';
+        if ( empty( $hook ) || ! is_string( $hook ) ) {
+            $msg = ' Error on checking ' . $type . ': invalid hook';
+            throw new HookException( $msg );
+        }
+        $id = "{$hook} {$type}";
+        if ( ! is_null( $cb ) && ! is_callable( $cb ) ) {
+            $msg = ' Error on checking ' . $id . ': the one given is not a valid callback.';
+            throw new HookException( $msg );
+        }
+        if ( ! is_null( $pri ) && ( ! is_numeric( $pri ) || (int) $pri < 0 ) ) {
+            $msg = ' Error on checking ' . $id . ': the one given is not a valid prioriry.';
+            throw new HookException( $msg );
+        }
+        if ( ! array_key_exists( $hook, static::$hooks[$target] ) ) return FALSE;
+        if ( is_null( $cb ) ) return TRUE;
+        $hooks = static::$hooks[$target][$hook];
+        $cbid = static::callbackUniqueId( $cb );
+        if ( ! is_null( $pri ) ) {
+            return array_key_exists( $pri, $hooks ) && array_key_exists( $cbid, $hooks[$pri] );
+        } else {
+            foreach ( $hooks as $_cbid => $cbdata ) {
+                if ( $_cbid === $cbid && isset( $cbdata['cb'] ) ) return TRUE;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param string $t Type of hook, 'action' or 'filter'
      * @param string $h Action hook to check
      * @param callable $cb Callback to check
@@ -206,7 +262,7 @@ class HooksMock {
      * @throws Brain\Striatum\Tests\HookException
      * @access protected
      */
-    protected static function assertHookAdded( $t = '', $h = '', $cb = NULL, $p = NULL, $n = NULL ) {
+    public static function assertHookAdded( $t = '', $h = '', $cb = NULL, $p = NULL, $n = NULL ) {
         if ( ! in_array( $t, [ 'action', 'filter' ], TRUE ) ) $t = 'action';
         $target = $t === 'filter' ? 'filters' : 'actions';
         if ( empty( $h ) || ! is_string( $h ) ) {
@@ -254,12 +310,13 @@ class HooksMock {
     /**
      * @param string $type Type of hook, 'action' or 'filter'
      * @param string $hook Filter hook to check
-     * @param callable $cb Callback to check
+     * @param callable $args Arguments to check
      * @throws Brain\Striatum\Tests\HookException
      * @access protected
      */
-    protected static function assertHookFired( $type = 'action', $hook = NULL, $cb = NULL ) {
+    public static function assertHookFired( $type = 'action', $hook = NULL, $args = NULL ) {
         if ( ! in_array( $type, [ 'action', 'filter' ], TRUE ) ) $type = 'action';
+        $target = $type === 'filter' ? 'filters' : 'actions';
         if ( empty( $hook ) || ! is_string( $hook ) ) {
             $msg = __METHOD__ . ' needs a valid hook to check.';
             throw new HookException( $msg );
@@ -269,46 +326,20 @@ class HooksMock {
             throw new HookException( $msg );
         }
         $id = "{$hook} {$type}";
-        $check = static::$hooks_done[$type];
-        if ( ! array_key_exists( $hook, $check ) ) {
+        if ( ! array_key_exists( $hook, static::$hooks_done[$target] ) ) {
             $msg = $id . ' was not fired.';
             throw new HookException( $msg );
         }
-        if ( is_null( $cb ) ) return;
-        if ( ! is_callable( $cb ) ) {
-            $msg = 'Invalid callback to check for ' . $id;
+        if ( is_null( $args ) ) return;
+        if ( ! is_array( $args ) ) {
+            $msg = 'Invalid arguments to check for ' . $id;
             throw new HookException( $msg );
         }
-        $cbid = static::callbackUniqueId( $cb );
-        if ( ! in_array( $cbid, $check[$hook] ) ) {
-            $msg = 'Callback given was not fired check during ' . $id;
+        $args = array_values( $args );
+        if ( ! in_array( $args, static::$hooks_done[$target][$hook] ) ) {
+            $msg = 'Arguments given were not fired check during ' . $id;
             throw new HookException( $msg );
         }
-    }
-
-    /**
-     * @param type $type    Type of hook, 'action' or 'filter'
-     * @param string $hook  Hook to fire
-     * @param array $cbdata 2 items array, 'cb' is a callable, 'num_args' accepted args number
-     * @param array $args   Arguments passed to do_action or apply_filters without 1st
-     * @param mixed $value  On first runs is the 2nd argument passed to do_action or apply_filters
-     *                      on subsequent runs is returned value of previous call of this method
-     * @return mixed        Whatever returned by given hook callback
-     * @access protected
-     * @see Brain\Striatum\Tests\HooksMock::fireHook()
-     */
-    protected static function fireHookCb( $type, $hook, $cbdata, $args, $value ) {
-        if ( ! is_null( $cbdata['cb'] ) && is_callable( $cbdata['cb'] ) ) {
-            $accepted = isset( $cbdata['num_args'] ) ? (int) $cbdata['num_args'] : 1;
-            $cb_args = array_slice( $args, 0, $accepted );
-            $cb_args[0] = $value;
-            $value = call_user_func_array( $cbdata['cb'], $cb_args );
-            if ( ! isset( static::$hooks_done[$type][$hook] ) ) {
-                static::$hooks_done[$type][$hook] = [ ];
-            }
-            static::$hooks_done[$type][$hook][] = static::callbackUniqueId( $cbdata['cb'] );
-        }
-        return $value;
     }
 
 }
