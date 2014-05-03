@@ -18,7 +18,7 @@ class SubjectTest extends TestCase {
         $subject->shouldReceive( 'getHooks' )->withNoArgs()->andReturn( $bucket );
         $subject->setContext();
         if ( ! is_null( $id ) ) {
-            $subject->shouldReceive( 'getId' )->once()->withNoArgs()->andReturn( $id );
+            $subject->shouldReceive( 'getId' )->withNoArgs()->andReturn( $id );
         }
         return $subject;
     }

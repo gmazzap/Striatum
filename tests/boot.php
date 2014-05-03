@@ -7,37 +7,38 @@ if ( ! defined( 'WP_DEBUG' ) ) {
 require_once STRIATUMBASEPATH . '/vendor/phpunit/phpunit/PHPUnit/Framework/Assert/Functions.php';
 if ( ! class_exists( 'WP_Error' ) ) require_once __DIR__ . '/class-wp-error.php';
 require_once __DIR__ . '/TestCase.php';
+require_once __DIR__ . '/HookException.php';
 require_once __DIR__ . '/HooksMock.php';
 require_once __DIR__ . '/wp-functions.php';
 
 if ( ! function_exists( 'assertActionAdded' ) ) {
 
-    function assertActionAdded( $hook = '', $cb = NULL, $pri = NULL, $n_args = NULL ) {
-        Brain\Striatum\Tests\HooksMock::assertActionAdded( $hook, $cb, $pri, $n_args );
+    function assertActionAdded( $hook = '', $callback = NULL, $priority = NULL, $args_num = NULL ) {
+        Brain\Striatum\Tests\HooksMock::assertActionAdded( $hook, $callback, $priority, $args_num );
     }
 
 }
 
 if ( ! function_exists( 'assertFilterAdded' ) ) {
 
-    function assertFilterAdded( $hook = '', $cb = NULL, $pri = NULL, $n_args = NULL ) {
-        Brain\Striatum\Tests\HooksMock::assertFilterAdded( $hook, $cb, $pri, $n_args );
+    function assertFilterAdded( $hook = '', $callback = NULL, $priority = NULL, $args_num = NULL ) {
+        Brain\Striatum\Tests\HooksMock::assertFilterAdded( $hook, $callback, $priority, $args_num );
     }
 
 }
 
 if ( ! function_exists( 'assertActionFired' ) ) {
 
-    function assertActionFired( $hook = '', $cb = NULL ) {
-        Brain\Striatum\Tests\HooksMock::assertActionFired( $hook, $cb );
+    function assertActionFired( $hook = '', $callback = NULL ) {
+        Brain\Striatum\Tests\HooksMock::assertActionFired( $hook, $callback );
     }
 
 }
 
 if ( ! function_exists( 'assertFilterFired' ) ) {
 
-    function assertFilterFired( $hook = '', $cb = NULL ) {
-        Brain\Striatum\Tests\HooksMock::assertFilterFired( $hook, $cb );
+    function assertFilterFired( $hook = '', $callback = NULL ) {
+        Brain\Striatum\Tests\HooksMock::assertFilterFired( $hook, $callback );
     }
 
 }

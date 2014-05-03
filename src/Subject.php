@@ -14,12 +14,12 @@ class Subject implements SubjectInterface, \SplSubject {
 
     protected $context;
 
-    function __construct( BucketInterface $bucket ) {
+    public function __construct( BucketInterface $bucket ) {
         $this->hooks = $bucket;
         $this->context = new \ArrayObject;
     }
 
-    function __clone() {
+    public function __clone() {
         $this->hooks = clone $this->hooks;
     }
 
