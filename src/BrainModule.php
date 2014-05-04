@@ -1,7 +1,8 @@
 <?php namespace Brain\Striatum;
 
-use Brain\Container as Container;
-use Brain\Module as Module;
+use Brain\Container;
+use Brain\Module;
+use Brain\Hooks;
 
 class BrainModule implements Module {
 
@@ -26,10 +27,16 @@ class BrainModule implements Module {
                 $c["striatum.hooks"], $c["striatum.frozen"], $c["striatum.subject"]
             );
         };
+        $c["hooks.api"] = function($c) {
+            return new API(
+                $c["striatum.manager"], $c["striatum.hooks"], $c["striatum.hook"]
+            );
+        };
     }
 
     function boot( Container $c ) {
-        return;
+        require_once $this->getPath() . 'Hooks.php';
+        Hooks::setApi( $c['hooks.api'] );
     }
 
     function getPath() {

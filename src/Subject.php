@@ -120,6 +120,10 @@ class Subject implements SubjectInterface, \SplSubject {
         return $this->setContext( 'context', $info, $value );
     }
 
+    public function getHooksArray() {
+        return $this->getHooks()->getArrayCopy();
+    }
+
     protected function getHookArgs( HookInterface $hook ) {
         return [
             $this->getId(),
