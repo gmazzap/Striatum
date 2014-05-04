@@ -1,6 +1,4 @@
-<?php
-
-namespace Brain\Striatum;
+<?php namespace Brain\Striatum;
 
 interface SubjectInterface {
 
@@ -19,6 +17,10 @@ interface SubjectInterface {
     public function getHook( $id );
 
     public function isFilter( $set = FALSE );
+
+    public function getInfo( $info = NULL );
+
+    public function setInfo( $info = NULL, $value = NULL );
 
     public function detachAll();
 

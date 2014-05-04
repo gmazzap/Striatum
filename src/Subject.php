@@ -1,8 +1,9 @@
-<?php
-
-namespace Brain\Striatum;
+<?php namespace Brain\Striatum;
 
 class Subject implements SubjectInterface, \SplSubject {
+
+    use Contextable,
+        Idable;
 
     protected $id;
 
@@ -20,13 +21,12 @@ class Subject implements SubjectInterface, \SplSubject {
     }
 
     public function __clone() {
-        $this->hooks = clone $this->hooks;
+        $hooks = $this->getHooks();
+        $this->hooks = clone $hooks;
     }
 
     public function __get( $name ) {
-        if ( $this->context->offsetExists( $name ) ) {
-            return $this->context[$name];
-        }
+        return $this->getInfo( $name );
     }
 
     public function attach( \SplObserver $hook ) {
@@ -95,14 +95,6 @@ class Subject implements SubjectInterface, \SplSubject {
         }
     }
 
-    public function setId( $id ) {
-        $this->id = $id;
-    }
-
-    public function getId() {
-        return $this->id;
-    }
-
     public function setHooks( BucketInterface $bucket ) {
         $this->hooks = $bucket;
     }
@@ -120,25 +112,12 @@ class Subject implements SubjectInterface, \SplSubject {
         return $this->filter;
     }
 
-    public function getContext( $index = NULL ) {
-        if ( is_null( $index ) ) {
-            return $this->context->getArrayCopy();
-        } elseif ( $this->context->offsetExists( $index ) ) {
-            return $this->context[$index];
-        }
+    public function getInfo( $info = NULL ) {
+        return $this->getContext( 'context', $info );
     }
 
-    public function setContext( $index = NULL, $value = NULL ) {
-        if ( ! is_null( $index ) && ( ! is_string( $index ) || empty( $index ) ) ) {
-            throw new \InvalidArgumentException;
-        } elseif ( is_null( $index ) && ! is_null( $value ) ) {
-            throw new \InvalidArgumentException;
-        }
-        if ( is_null( $index ) ) {
-            $this->context = new \ArrayObject;
-        } else {
-            $this->context[$index] = $value;
-        }
+    public function setInfo( $info = NULL, $value = NULL ) {
+        return $this->setContext( 'context', $info, $value );
     }
 
     protected function getHookArgs( HookInterface $hook ) {
@@ -148,10 +127,6 @@ class Subject implements SubjectInterface, \SplSubject {
             $hook->get( 'priority' ),
             $hook->get( 'args_num' )
         ];
-    }
-
-    protected function reset() {
-        $this->args = [ ];
     }
 
 }

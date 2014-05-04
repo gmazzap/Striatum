@@ -1,6 +1,4 @@
-<?php
-
-namespace Brain\Striatum;
+<?php namespace Brain\Striatum;
 
 class Bucket extends \ArrayObject implements BucketInterface {
 

@@ -1,6 +1,4 @@
-<?php
-
-namespace Brain\Striatum;
+<?php namespace Brain\Striatum;
 
 use Brain\Container as Container;
 use Brain\Module as Module;

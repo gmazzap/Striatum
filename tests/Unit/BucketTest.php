@@ -1,6 +1,4 @@
-<?php
-
-namespace Brain\Striatum\Tests\Unit;
+<?php namespace Brain\Striatum\Tests\Unit;
 
 use Brain\Striatum\Tests\TestCase;
 

@@ -1,6 +1,4 @@
-<?php
-
-namespace Brain\Striatum;
+<?php namespace Brain\Striatum;
 
 interface SubjectsManagerInterface {
 
@@ -10,17 +8,9 @@ interface SubjectsManagerInterface {
 
     function addSubject( $id, $is_filter = FALSE );
 
-    function addSubjects( $ids = [ ], $is_filter = FALSE );
-
     function removeSubject( $id );
-
-    function removeSubjects( $ids = [ ] );
 
     function freezeSubject( $id );
 
-    function freezeSubjects( $ids = [ ] );
-
     function unfreezeSubject( $id );
-
-    function unfreezeSubjects( $ids = [ ] );
 }

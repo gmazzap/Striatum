@@ -1,6 +1,4 @@
-<?php
-
-namespace Brain\Striatum;
+<?php namespace Brain\Striatum;
 
 interface HookInterface {
 
@@ -8,13 +6,13 @@ interface HookInterface {
 
     function getId();
 
-    function get( $index = NULL );
-
-    function set( $index, $value = NULL );
-
     function setSubject( SubjectInterface $subject );
 
     function getSubject();
+
+    function get( $index = NULL );
+
+    function set( $index = NULL, $value = NULL );
 
     function prepare( $args );
 

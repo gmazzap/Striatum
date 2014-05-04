@@ -1,18 +1,18 @@
-<?php
-
-namespace Brain\Striatum;
+<?php namespace Brain\Striatum;
 
 class Hook implements HookInterface, \SplObserver {
 
+    use Contextable,
+        Idable;
+
+    protected $id;
+
     private $times = 0;
 
-    private $storage;
-
-    protected $last_args = [ ];
+    private $context;
 
     function __construct() {
-        $base = [ 'args' => [ ], 'id' => NULL, 'subject' => NULL, 'last_args' => NULL ];
-        $this->storage = new \ArrayObject( $base );
+        $this->context = new \ArrayObject();
     }
 
     public function __get( $name ) {
@@ -23,55 +23,32 @@ class Hook implements HookInterface, \SplObserver {
         if ( strpos( $name, 'get' ) === 0 && empty( $arguments ) ) {
             $name = strtolower( substr( $name, 3 ) );
             return $this->get( $name );
-        } elseif ( preg_match( '/^run([0-9]+)+times$/i', $name, $matches ) ) {
-            return $this->runNTimes( $matches[1] );
         } elseif ( strpos( $name, 'run' ) === 0 ) {
-            $times = strtolower( ltrim( $name, 'run' ) );
+            $times = strtolower( substr( $name, 3 ) );
+            $matches = [ ];
             if ( in_array( $times, [ 'once', 'twice' ], TRUE ) ) {
                 $n = $times === 'twice' ? 2 : 1;
                 return $this->runNTimes( $n );
+            } elseif ( preg_match( '/^run([0-9]+)+times$/i', $name, $matches ) ) {
+                return $this->runNTimes( $matches[1] );
             }
         }
     }
 
+    public function get( $index = NULL ) {
+        return $this->getContext( 'context', $index );
+    }
+
+    public function set( $index = NULL, $value = NULL ) {
+        return $this->setContext( 'context', $index, $value );
+    }
+
     public function setSubject( SubjectInterface $subject ) {
-        $this->storage['subject'] = $subject;
-        return $this;
+        return $this->set( 'subject', $subject );
     }
 
     public function getSubject() {
-        return $this->storage['subject'];
-    }
-
-    public function set( $index, $value = NULL ) {
-        if ( ! is_string( $index ) ) {
-            throw new \InvalidArgumentException;
-        }
-        $this->storage['args'][$index] = $value;
-        return $this;
-    }
-
-    public function get( $index = NULL ) {
-        if ( ! is_null( $index ) && ! is_string( $index ) ) {
-            throw new \InvalidArgumentException;
-        }
-        if ( is_null( $index ) ) {
-            return $this->storage['args'];
-        } elseif ( isset( $this->storage['args'][$index] ) ) {
-            return $this->storage['args'][$index];
-        }
-    }
-
-    public function setId( $id ) {
-        if ( ! is_string( $id ) || empty( $id ) ) {
-            throw new \InvalidArgumentException;
-        }
-        $this->storage['id'] = $id;
-        return $this;
-    }
-
-    public function getId() {
-        return $this->storage['id'];
+        return $this->get( 'subject' );
     }
 
     public function prepare( $args ) {
@@ -84,7 +61,10 @@ class Hook implements HookInterface, \SplObserver {
         $args['args_num'] = (int) $args['args_num'];
         $args['times'] = (int) $args['times'];
         if ( ! is_callable( $args['callback'] ) ) $args['callback'] = NULL;
-        $this->storage['args'] = $args;
+        $this->set( 'callback', $args['callback'] );
+        $this->set( 'priority', $args['priority'] );
+        $this->set( 'args_num', $args['args_num'] );
+        $this->set( 'times', $args['times'] );
         return $this;
     }
 
@@ -112,26 +92,25 @@ class Hook implements HookInterface, \SplObserver {
         if ( ! is_array( $args ) ) {
             throw new \InvalidArgumentException;
         }
-        $this->storage['last_args'] = $args;
-        return $this;
+        return $this->set( 'last_args', $args );
     }
 
     public function getLastArgs() {
-        return $this->storage['last_args'];
+        return $this->get( 'last_args' );
     }
 
     public function runNTimes( $n = 1 ) {
         if ( ! is_numeric( $n ) || (int) $n < 0 ) {
             throw new \InvalidArgumentException;
         }
-        $this->set( 'times', (int) $n );
-        return $this;
+        return $this->set( 'times', (int) $n );
     }
 
     function check() {
         $sub = $this->getSubject() instanceof SubjectInterface;
         $id = $this->getId() ? : FALSE;
-        return $sub && is_string( $id ) && is_callable( $this->get( 'callback' ) );
+        $callback = $this->get( 'callback' );
+        return $sub && is_string( $id ) && is_callable( $callback );
     }
 
     function before( SubjectInterface $subject ) {
@@ -143,10 +122,10 @@ class Hook implements HookInterface, \SplObserver {
         if ( ( $times > 0 ) && $times >= $this->times ) {
             return $subject->detach( $this );
         }
-        $subject->setContext( 'priority_now', $this->get( 'priority' ) );
-        $subject->setContext( 'callback_now', $id );
-        $calling = $subject->getContext( 'calling' ) ? : [ ];
-        $subject->setContext( 'calling', array_merge( $calling, [ $id ] ) );
+        $subject->setInfo( 'priority_now', $this->get( 'priority' ) );
+        $subject->setInfo( 'callback_now', $id );
+        $calling = $subject->getInfo( 'calling' ) ? : [ ];
+        $subject->setInfo( 'calling', array_merge( $calling, [ $id ] ) );
         return $this;
     }
 
@@ -155,13 +134,13 @@ class Hook implements HookInterface, \SplObserver {
         if ( empty( $id ) || ! is_string( $id ) ) {
             throw new \InvalidArgumentException;
         }
-        $calling = $subject->getContext( 'calling' ) ? : [ ];
-        $called = $subject->getContext( 'called' ) ? : [ ];
-        $subject->setContext( 'calling', array_diff( $calling, [ $id ] ) );
-        $subject->setContext( 'priority_now', NULL );
-        $subject->setContext( 'callback_now', NULL );
-        $subject->setContext( 'called', array_merge( $called, [ $id ] ) );
-        $subject->setContext( 'last_callback', $id );
+        $calling = $subject->getInfo( 'calling' ) ? : [ ];
+        $called = $subject->getInfo( 'called' ) ? : [ ];
+        $subject->setInfo( 'calling', array_diff( $calling, [ $id ] ) );
+        $subject->setInfo( 'priority_now', NULL );
+        $subject->setInfo( 'callback_now', NULL );
+        $subject->setInfo( 'called', array_merge( $called, [ $id ] ) );
+        $subject->setInfo( 'last_callback', $id );
         $this->times ++;
         $times = $this->get( 'times' );
         if ( ( $times > 0 ) && $this->times >= $times ) {

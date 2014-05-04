@@ -1,6 +1,4 @@
-<?php
-
-namespace Brain\Striatum\Tests\Unit;
+<?php namespace Brain\Striatum\Tests\Unit;
 
 use Brain\Striatum\Tests\TestCase;
 use Brain\Striatum\Tests\HooksMock as HM;
@@ -17,7 +15,7 @@ class SubjectTest extends TestCase {
         $bucket = \Mockery::mock( 'Brain\Striatum\Bucket' );
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' )->makePartial();
         $subject->shouldReceive( 'getHooks' )->withNoArgs()->andReturn( $bucket );
-        $subject->setContext();
+        $subject->setInfo();
         if ( ! is_null( $id ) ) {
             $subject->shouldReceive( 'getId' )->withNoArgs()->andReturn( $id );
         }
@@ -156,16 +154,16 @@ class SubjectTest extends TestCase {
 
     function testSetGetContext() {
         $subject = $this->get();
-        assertEquals( [ ], $subject->getContext() );
-        $subject->setContext( 'foo', 'bar' );
-        $subject->setContext( 'bar', 'baz' );
-        $subject->setContext( 'baz' );
-        assertEquals( [ 'foo' => 'bar', 'bar' => 'baz', 'baz' => NULL ], $subject->getContext() );
-        assertEquals( 'bar', $subject->getContext( 'foo' ) );
-        assertEquals( 'baz', $subject->getContext( 'bar' ) );
-        assertNull( $subject->getContext( 'baz' ) );
-        $subject->setContext();
-        assertEquals( [ ], $subject->getContext() );
+        assertEquals( [ ], $subject->getInfo() );
+        $subject->setInfo( 'foo', 'bar' );
+        $subject->setInfo( 'bar', 'baz' );
+        $subject->setInfo( 'baz' );
+        assertEquals( [ 'foo' => 'bar', 'bar' => 'baz', 'baz' => NULL ], $subject->getInfo() );
+        assertEquals( 'bar', $subject->getInfo( 'foo' ) );
+        assertEquals( 'baz', $subject->getInfo( 'bar' ) );
+        assertNull( $subject->getInfo( 'baz' ) );
+        $subject->setInfo();
+        assertEquals( [ ], $subject->getInfo() );
     }
 
     /**
@@ -173,7 +171,7 @@ class SubjectTest extends TestCase {
      */
     function testSetContextFailsIfBadIndex() {
         $subject = $this->get();
-        $subject->setContext( TRUE, 'bar' );
+        $subject->setInfo( TRUE, 'bar' );
     }
 
     /**
@@ -181,13 +179,13 @@ class SubjectTest extends TestCase {
      */
     function testSetContextFailsIfEmptyIndexNonEmptyValue() {
         $subject = $this->get();
-        $subject->setContext( NULL, 'bar' );
+        $subject->setInfo( NULL, 'bar' );
     }
 
     function testMagicGet() {
         $subject = $this->get();
-        $subject->setContext( 'foo', 'bar' );
-        $subject->setContext( 'bar', 'baz' );
+        $subject->setInfo( 'foo', 'bar' );
+        $subject->setInfo( 'bar', 'baz' );
         assertEquals( 'bar', $subject->foo );
         assertEquals( 'baz', $subject->bar );
     }

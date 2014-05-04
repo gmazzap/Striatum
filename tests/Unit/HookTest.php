@@ -1,6 +1,4 @@
-<?php
-
-namespace Brain\Striatum\Tests\Unit;
+<?php namespace Brain\Striatum\Tests\Unit;
 
 use Brain\Striatum\Tests\TestCase;
 use Brain\Striatum as S;
@@ -37,7 +35,7 @@ class HookTest extends TestCase {
 
     function testGetFullArgs() {
         $hook = new S\Hook;
-        assertEquals( [ ], $hook->get() );
+        assertTrue( is_array( $hook->get() ) );
     }
 
     function testSetGet() {
@@ -106,6 +104,7 @@ class HookTest extends TestCase {
 
     function testProxy() {
         $hook = \Mockery::mock( 'Brain\Striatum\Hook' )->makePartial();
+        $hook->set();
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' );
         $hook->shouldReceive( 'check' )->atLeast( 1 )->withNoArgs()->andReturn( TRUE );
         $hook->shouldReceive( 'getSubject' )->atLeast( 1 )->withNoArgs()->andReturn( $subject );
@@ -124,6 +123,7 @@ class HookTest extends TestCase {
 
     function testUpdate() {
         $hook = \Mockery::mock( 'Brain\Striatum\Hook' )->makePartial();
+        $hook->set();
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' );
         $subject->shouldReceive( 'isFilter' )->atLeast( 1 )->withNoArgs()->andReturn( TRUE );
         $hook->shouldReceive( 'before' )->atLeast( 1 )->with( $subject )->andReturn( $hook );
@@ -234,8 +234,8 @@ class HookTest extends TestCase {
 
     function testBefore() {
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' );
-        $subject->shouldReceive( 'setContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
-        $subject->shouldReceive( 'getContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'setInfo' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'getInfo' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
         $hook = new S\Hook;
         $hook->setId( 'foo' )->prepare( [ ] ); // set defaults
         assertEquals( $hook, $hook->before( $subject ) );
@@ -260,8 +260,8 @@ class HookTest extends TestCase {
 
     function testAfter() {
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' );
-        $subject->shouldReceive( 'setContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
-        $subject->shouldReceive( 'getContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'setInfo' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'getInfo' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
         $hook = new S\Hook;
         $hook->setId( 'foo' )->prepare( [ ] );
         assertEquals( $hook, $hook->after( $subject ) );
@@ -270,8 +270,8 @@ class HookTest extends TestCase {
     function testBeforeDetachIfNeeded() {
         $hook = new S\Hook;
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' );
-        $subject->shouldReceive( 'setContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
-        $subject->shouldReceive( 'getContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'setInfo' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'getInfo' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
         $subject->shouldReceive( 'detach' )->twice()->with( $hook )->andReturn( 'detached' );
         $hook->setId( 'foo' )->prepare( [ ] )->runOnce();
         $hook->after( $subject ); // increment times count
@@ -281,8 +281,8 @@ class HookTest extends TestCase {
     function testAfterDetachIfNeeded() {
         $hook = new S\Hook;
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' );
-        $subject->shouldReceive( 'setContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
-        $subject->shouldReceive( 'getContext' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'setInfo' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $subject->shouldReceive( 'getInfo' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
         $subject->shouldReceive( 'detach' )->atLeast( 1 )->with( $hook )->andReturn( 'detached' );
         $hook->setId( 'foo' )->prepare( [ ] )->runOnce();
         $hook->after( $subject ); // increment times count
