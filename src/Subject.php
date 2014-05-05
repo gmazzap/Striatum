@@ -2,27 +2,19 @@
 
 class Subject implements SubjectInterface, \SplSubject {
 
-    use Contextable,
+    use Fullclonable,
+        Contextable,
         Idable;
 
     protected $id;
 
-    protected $args = [ ];
-
     protected $hooks;
-
-    protected $filter = FALSE;
 
     protected $context;
 
     public function __construct( BucketInterface $bucket ) {
         $this->hooks = $bucket;
         $this->context = new \ArrayObject;
-    }
-
-    public function __clone() {
-        $hooks = $this->getHooks();
-        $this->hooks = clone $hooks;
     }
 
     public function __get( $name ) {
@@ -108,8 +100,8 @@ class Subject implements SubjectInterface, \SplSubject {
     }
 
     public function isFilter( $set = NULL ) {
-        if ( $set === TRUE ) $this->filter = $set;
-        return $this->filter;
+        if ( $set === TRUE ) $this->setInfo( 'is_filter', TRUE );
+        return (bool) $this->getInfo( 'is_filter' );
     }
 
     public function getInfo( $info = NULL ) {
