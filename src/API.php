@@ -9,7 +9,7 @@ use Brain\Striatum\SubjectsManager as Manager;
  * ##############################################################################################
  * Striatum package allows an object-oriented way to handle WordPress hooks.
  * ##############################################################################################
- * 
+ *
  * It uses an implementation of Observer pattern, where every hook is associated to a Subject
  * instance, that notify all the Observer instances attached: so where WP core plugin API uses
  * callbacks and global variables, this package uses objects.
@@ -420,7 +420,7 @@ class API {
      * Given an hook (or a subject object) and an observer id returns true if the observer is added
      * to the hook and the hook is a filter. False otherwise.
      *
-     * @param string|\Brain\Striatum\SubjectInterface $hook Action or filter hook or Subject object
+     * @param string|\Brain\Striatum\SubjectInterface $hook Action / filter hook or Subject object
      * @param string $id                                    Observer id
      * @return boolean|\WP_Error
      * @uses \Brain\Striatum\API::hookHas()
@@ -528,7 +528,7 @@ class API {
         $name = get_class( $exc );
         $name .= $exc->getCode() ? '-' . $exc->getCode() : '';
         $msg = $exc->getMessage() ? : '';
-        return new \WP_Error( 'brain-exception-' . $name, $msg );
+        return new \WP_Error( 'hooks-exception-' . $name, $msg );
     }
 
     /**

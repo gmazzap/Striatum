@@ -80,6 +80,12 @@ class HooksMock {
             $data['num_args'] = isset( $data['num_args'] ) ? (int) $data['num_args'] : 1;
             if ( (int) $num_args > 0 && $data['num_args'] !== (int) $num_args ) return;
             unset( HooksMock::$hooks[$target][$hook][$priority][$id] );
+            if ( empty( HooksMock::$hooks[$target][$hook][$priority] ) ) {
+                unset( HooksMock::$hooks[$target][$hook][$priority] );
+            }
+            if ( empty( HooksMock::$hooks[$target][$hook] ) ) {
+                unset( HooksMock::$hooks[$target][$hook] );
+            }
         }
     }
 
@@ -103,9 +109,6 @@ class HooksMock {
         if ( empty( $hook ) || ! is_string( $hook ) ) {
             $msg = ' Error on adding ' . $type . ': invalid hook';
             throw new HookException( $msg );
-        }
-        if ( ! isset( static::$hooks_done[$type][$hook] ) ) {
-            static::$hooks_done[$target][$hook] = [ ];
         }
         static::$hooks_done[$target][$hook][] = $args;
         return [ $type, $hook, $args ];
@@ -170,11 +173,11 @@ class HooksMock {
      * Throws an exception if assertion is wrong.
      *
      * @param string $hook Action hook to check
-     * @param callable $cb Callback to check
+     * @param args $args Arguments to check
      * @uses Brain\Striatum\Tests\HooksMock::hookFiredTest()
      */
-    public static function assertActionFired( $hook = NULL, $cb = NULL ) {
-        static::assertHookFired( 'action', $hook, $cb );
+    public static function assertActionFired( $hook = NULL, $args = [ ] ) {
+        static::assertHookFired( 'action', $hook, $args );
     }
 
     /**
@@ -182,11 +185,11 @@ class HooksMock {
      * Throws an exception if assertion is wrong.
      *
      * @param string $hook Filter hook to check
-     * @param callable $cb Callback to check
+     * @param array $args Arguments to check
      * @uses Brain\Striatum\Tests\HooksMock::hookFiredTest()
      */
-    public static function assertFilterFired( $hook = NULL, $cb = NULL ) {
-        static::assertHookFired( 'filter', $hook, $cb );
+    public static function assertFilterFired( $hook = NULL, $args = [ ] ) {
+        static::assertHookFired( 'filter', $hook, $args );
     }
 
     /**
@@ -244,11 +247,13 @@ class HooksMock {
         if ( ! is_null( $pri ) ) {
             return array_key_exists( $pri, $hooks ) && array_key_exists( $cbid, $hooks[$pri] );
         } else {
-            foreach ( $hooks as $_cbid => $cbdata ) {
-                if ( $_cbid === $cbid && isset( $cbdata['cb'] ) ) return TRUE;
+            foreach ( $hooks as $pri => $cbdata ) {
+                foreach ( $cbdata as $_cbid => $_cbdata ) {
+                    if ( $_cbid === $cbid && isset( $_cbdata['cb'] ) ) return TRUE;
+                }
             }
         }
-        return false;
+        return FALSE;
     }
 
     /**
@@ -265,12 +270,12 @@ class HooksMock {
         $target = $t === 'filter' ? 'filters' : 'actions';
         if ( empty( $h ) || ! is_string( $h ) ) {
             $msg = __METHOD__ . ' needs a valid hook to check.';
-            throw new HookException( $msg );
+            throw new \InvalidArgumentException( $msg );
         }
         $id = "{$h} {$t}";
-        if ( empty( $cb ) ) {
+        if ( ! is_callable( $cb, TRUE ) ) {
             $msg = 'Use a valid callback to check for ' . $id . '.';
-            throw new HookException( $msg );
+            throw new \InvalidArgumentException( $msg );
         }
         if ( ! array_key_exists( $h, static::$hooks[$target] ) ) {
             $msg = $h . 'is not a valid ' . $t . ' added.';
@@ -279,7 +284,7 @@ class HooksMock {
         $hooks = static::$hooks[$target][$h];
         if ( ! is_null( $p ) && ! is_numeric( $p ) ) {
             $msg = $p . 'Not numeric priority to check for ' . $id;
-            throw new HookException( $msg );
+            throw new \InvalidArgumentException( $msg );
         }
         if ( ! is_null( $n ) && ! is_numeric( $n ) ) {
             $msg = $n . 'Not numeric accepted args num to check for ' . $id;
@@ -317,24 +322,20 @@ class HooksMock {
         $target = $type === 'filter' ? 'filters' : 'actions';
         if ( empty( $hook ) || ! is_string( $hook ) ) {
             $msg = __METHOD__ . ' needs a valid hook to check.';
-            throw new HookException( $msg );
-        }
-        if ( empty( $hook ) || ! is_string( $hook ) ) {
-            $msg = 'Invalid hook to check for ' . $type . 'Fired.';
-            throw new HookException( $msg );
+            throw new \InvalidArgumentException( $msg );
         }
         $id = "{$hook} {$type}";
+        if ( ! is_null( $args ) && ! is_array( $args ) ) {
+            $msg = 'Invalid arguments to check for fired ' . $id . '.';
+            throw new \InvalidArgumentException( $msg );
+        }
         if ( ! array_key_exists( $hook, static::$hooks_done[$target] ) ) {
             $msg = $id . ' was not fired.';
             throw new HookException( $msg );
         }
         if ( is_null( $args ) ) return;
-        if ( ! is_array( $args ) ) {
-            $msg = 'Invalid arguments to check for ' . $id;
-            throw new HookException( $msg );
-        }
         $args = array_values( $args );
-        if ( ! in_array( $args, static::$hooks_done[$target][$hook] ) ) {
+        if ( ! in_array( $args, static::$hooks_done[$target][$hook], TRUE ) ) {
             $msg = 'Arguments given were not fired check during ' . $id;
             throw new HookException( $msg );
         }
