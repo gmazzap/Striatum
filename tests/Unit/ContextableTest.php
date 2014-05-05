@@ -5,7 +5,6 @@ use Brain\Striatum\Tests\TestCase;
 class TestContextable extends TestCase {
 
     protected function get() {
-        require_once dirname( dirname( __FILE__ ) ) . '/ContextStub.php';
         return new \Brain\Striatum\Tests\ContextStub;
     }
 

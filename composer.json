@@ -27,6 +27,11 @@
             "Brain\\Striatum\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Brain\\Striatum\\Tests\\": "tests/src/"
+        }
+    },
     "config": {
         "optimize-autoloader": true
     }

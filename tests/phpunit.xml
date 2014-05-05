@@ -8,11 +8,11 @@
         <listener class="\Mockery\Adapter\Phpunit\TestListener"></listener>
     </listeners>
     <testsuites>
-        <testsuite name="U">
-            <directory>Unit</directory>
-        </testsuite>
         <testsuite name="M">
             <directory>Mock</directory>
+        </testsuite>
+        <testsuite name="U">
+            <directory>Unit</directory>
         </testsuite>
     </testsuites>
 </phpunit>
