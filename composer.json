@@ -13,12 +13,6 @@
         "issues": "https://github.com/Giuseppe-Mazzapica/Striatum/issues",
         "source": "https://github.com/Giuseppe-Mazzapica/Striatum"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/Giuseppe-Mazzapica/Brain"
-        }
-    ],
     "require": {
         "php": ">=5.4",
         "brain/brain": "dev-master"
