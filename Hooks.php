@@ -29,10 +29,14 @@
  */
 class Hooks {
 
-    private $api;
+    private static $api;
 
     public static function setApi( Striatum\API $api ) {
         self::$api = $api;
+        return self::$api;
+    }
+
+    public static function api() {
         return self::$api;
     }
 

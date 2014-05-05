@@ -2,7 +2,8 @@
 
 class Hook implements HookInterface, \SplObserver {
 
-    use Contextable,
+    use Fullclonable,
+        Contextable,
         Idable;
 
     protected $id;
@@ -55,16 +56,24 @@ class Hook implements HookInterface, \SplObserver {
         if ( ! is_array( $args ) && ! is_string( $args ) ) {
             throw new \InvalidArgumentException;
         }
-        $def = [ 'callback' => '__return_false', 'priority' => 10, 'args_num' => 1, 'times' => 0 ];
+        $def = [ 'priority' => 10, 'args_num' => 1, 'times' => 0, 'callback' => NULL ];
         $args = wp_parse_args( $args, $def );
-        $args['priority'] = (int) $args['priority'];
-        $args['args_num'] = (int) $args['args_num'];
-        $args['times'] = (int) $args['times'];
-        if ( ! is_callable( $args['callback'] ) ) $args['callback'] = NULL;
+        if ( ! is_numeric( $args['priority'] ) ) {
+            $args['priority'] = 10;
+        }
+        if ( ! is_numeric( $args['args_num'] ) ) {
+            $args['args_num'] = 1;
+        }
+        if ( ! is_numeric( $args['times'] ) ) {
+            $args['args_num'] = 0;
+        }
+        if ( ! is_callable( $args['callback'] ) ) {
+            $args['callback'] = NULL;
+        }
+        $this->set( 'priority', (int) $args['priority'] );
+        $this->set( 'args_num', (int) $args['args_num'] );
+        $this->set( 'times', (int) $args['times'] );
         $this->set( 'callback', $args['callback'] );
-        $this->set( 'priority', $args['priority'] );
-        $this->set( 'args_num', $args['args_num'] );
-        $this->set( 'times', $args['times'] );
         return $this;
     }
 
@@ -72,7 +81,8 @@ class Hook implements HookInterface, \SplObserver {
         if ( ! $this->check() ) {
             return func_num_args() > 0 ? func_get_arg( 0 ) : NULL;
         }
-        $this->setLastArgs( func_get_args() );
+        $args = array_slice( func_get_args(), 0, $this->get( 'args_num' ) );
+        $this->setLastArgs( $args );
         return $this->update( $this->getSubject() );
     }
 

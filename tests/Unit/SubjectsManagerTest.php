@@ -4,10 +4,12 @@ use Brain\Striatum\Tests\TestCase;
 
 class SubjectsManagerTest extends TestCase {
 
-    protected function getMocked( $filter = FALSE ) {
+    protected function getMocked( $id = '', $filter = FALSE ) {
         $bucket = \Mockery::mock( 'Brain\Striatum\Bucket' );
         $prototype = \Mockery::mock( 'Brain\Striatum\Subject' );
         $prototype->shouldReceive( 'getHooks' )->andReturn( $bucket );
+        $prototype->shouldReceive( 'setId' )->andReturn( $prototype );
+        $prototype->shouldReceive( 'getId' )->andReturn( $id );
         $prototype->shouldReceive( 'isFilter' )->andReturn( $filter );
         $manager = \Mockery::mock( 'Brain\Striatum\SubjectsManager' )->makePartial();
         $manager->setContext( 'subjects' );
@@ -53,7 +55,7 @@ class SubjectsManagerTest extends TestCase {
     }
 
     function testAddSubject() {
-        $manager = $this->getMocked();
+        $manager = $this->getMocked( 'foo' );
         $subject = $manager->addSubject( 'foo' );
         assertInstanceOf( 'Brain\Striatum\Subject', $subject );
         $manager->getSubjects( 'foo' );

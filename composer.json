@@ -1,6 +1,6 @@
 {
     "name": "brain/striatum",
-    "description": "Observer pattern package for WordPress",
+    "description": "Observer pattern package for WordPress hooks",
     "authors": [
         {
             "name": "Giuseppe Mazzapica",
@@ -13,6 +13,7 @@
         "issues": "https://github.com/Giuseppe-Mazzapica/Striatum/issues",
         "source": "https://github.com/Giuseppe-Mazzapica/Striatum"
     },
+    "license": "GPL-2.0+",
     "require": {
         "php": ">=5.4",
         "brain/brain": "dev-master"

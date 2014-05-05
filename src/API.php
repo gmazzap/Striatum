@@ -1,6 +1,6 @@
 <?php namespace Brain\Striatum;
 
-use Brain\Striatum\HookInterface as Hook;
+use Brain\Striatum\HookInterface;
 use Brain\Striatum\SubjectsManager as Manager;
 
 /**
@@ -51,7 +51,7 @@ class API {
      * @param \Brain\Striatum\HookInterface $hook       Hook object instance used as prototype
      * @since 0.1
      */
-    public function __construct( Manager $manager, \ArrayObject $hooks, Hook $hook ) {
+    public function __construct( Manager $manager, \ArrayObject $hooks, HookInterface $hook ) {
         $this->manager = $manager;
         $this->hooks = $hooks;
         $this->hook = $hook;
@@ -90,7 +90,7 @@ class API {
      * @since 0.1
      */
     public function getHook( $hook, $id ) {
-        $hooks = $hooks instanceof SubjectInterface ? $hooks : $this->getHooks( $hook, TRUE );
+        $hooks = $hook instanceof SubjectInterface ? $hook : $this->getHooks( $hook, TRUE );
         if ( is_wp_error( $hooks ) ) {
             return $hooks;
         }
@@ -116,7 +116,7 @@ class API {
      * @param string|array $hook    Action or filter hook, e.g. 'init' or 'the_title'
      *                              Is possible to pass an array or a comma separed list of hook.
      * @param boolean $is_filter    If true add a filter, otherwise an action
-     * @return array|\Brain\Striatum\Hook|\WP_Error
+     * @return array|\Brain\Striatum\HookInterface|\WP_Error
      * @see \Brain\Striatum\API::addAction()
      * @see \Brain\Striatum\API::addFilter()
      * @since 0.1
@@ -129,10 +129,10 @@ class API {
             return new \WP_Error( 'hooks-bad-hook' );
         }
         try {
-            $hookObject = clone $this->hook;
-            $hookObject->prepare( $args );
             $singular = is_string( $hook ) && ( substr_count( $hook, ',' ) === 0 );
             $subjects = $this->manager->addSubjects( $hook, $is_filter );
+            $hookObject = clone $this->hook;
+            $hookObject->prepare( $args );
             $added = [ ];
             foreach ( $subjects as $subject ) {
                 $added[] = $this->addSubjectHook( $subject, $hookObject, $hook, $id, $args );
@@ -149,12 +149,12 @@ class API {
      * If the given observer id does not exists the method act as addHook, adding a new hook.
      *
      * @param string $hook
-     * @param string|\Brain\Striatum\Hook $observer Action or filter hook, e.g. 'init' or 'the_title'
-     * @param type $args                            New observer params
-     * @param type $new_as_filter                   When the observer does not exists, a new one
-     *                                              is created and if this param is true it's created
-     *                                              as filter
-     * @return \Brain\Striatum\Hook|\WP_Error
+     * @param string|\Brain\Striatum\HookInterface $observer Action or filter hook, e.g. 'init'
+     * @param type $args                                    New observer params
+     * @param type $new_as_filter                           When the observer does not exists, a new one
+     *                                                      is created and if this param is true it's created
+     *                                                      as filter
+     * @return \Brain\Striatum\HookInterface|\WP_Error
      * @since 0.1
      */
     public function updateHook( $hook, $observer, $args = [ ], $new_as_filter = FALSE ) {
@@ -202,7 +202,7 @@ class API {
      * @param int $priority         Observer priority. Default 10.
      * @param int $args_num         Accepted arguments number. Default 1.
      * @param int $times            Make observer run a given number of times. Default 0 (no limit).
-     * @return array|\Brain\Striatum\Hook|\WP_Error
+     * @return array|\Brain\Striatum\HookInterface|\WP_Error
      * @uses \Brain\Striatum\API::addHook()
      * @see \add_filter()
      * @since 0.1
@@ -229,7 +229,7 @@ class API {
      * @param int $priority         Observer priority. Default 10.
      * @param int $args_num         Accepted arguments number. Default 1.
      * @param int $times            Make observer run a given number of times. Default 0 (no limit).
-     * @return array|\Brain\Striatum\Hook|\WP_Error
+     * @return array|\Brain\Striatum\HookInterface|\WP_Error
      * @uses \Brain\Striatum\API::addHook()
      * @see \add_action()
      * @since 0.1

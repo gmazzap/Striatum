@@ -40,6 +40,7 @@ class SubjectsManager implements SubjectsManagerInterface {
             if ( ! $subject instanceof SubjectInterface ) {
                 throw new \DomainException;
             }
+            $subject->setId( $id );
             $subject->isFilter( $is_filter );
             $this->setSubjects( $id, $subject );
         }

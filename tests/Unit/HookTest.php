@@ -237,7 +237,7 @@ class HookTest extends TestCase {
         $subject->shouldReceive( 'setInfo' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
         $subject->shouldReceive( 'getInfo' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
         $hook = new S\Hook;
-        $hook->setId( 'foo' )->prepare( [ ] ); // set defaults
+        $hook->setId( 'foo' )->set( 'callback', '__return_true' )->prepare( [ ] ); // set defaults
         assertEquals( $hook, $hook->before( $subject ) );
     }
 

@@ -1,4 +1,27 @@
 <?php
+if ( ! function_exists( 'trailingslashit' ) ) {
+
+    function trailingslashit( $string ) {
+        return untrailingslashit( $string ) . '/';
+    }
+
+}
+if ( ! function_exists( 'untrailingslashit' ) ) {
+
+    function untrailingslashit( $string ) {
+        return rtrim( $string, '/\\' );
+    }
+
+}
+
+if ( ! function_exists( 'plugin_dir_path' ) ) {
+
+    function plugin_dir_path( $file ) {
+        return trailingslashit( dirname( $file ) );
+    }
+
+}
+
 if ( ! function_exists( 'stripslashes_deep' ) ) {
 
     function stripslashes_deep( $value ) {
