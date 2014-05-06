@@ -34,27 +34,27 @@ class Hooks {
     private static $container;
 
     public static function setContainer( Brain $container ) {
-        self::$container = $container;
-        return self::$container;
+        static::$container = $container;
+        return static::$container;
     }
 
     public static function api() {
-        return self::$container->get( 'hooks.api' );
+        return static::$container->get( 'hooks.api' );
     }
 
     public static function __callStatic( $name, $arguments ) {
-        if ( ! self::$container instanceof Brain || ! self::api() instanceof Striatum\API ) {
+        if ( ! static::$container instanceof Brain || ! static::api() instanceof Striatum\API ) {
             return new \WP_Error( 'hooks-api-not-ready', 'Hooks API object is not ready.' );
         }
-        if ( method_exists( self::api(), $name ) ) {
-            return call_user_func_array( [ self::api(), $name ], $arguments );
+        if ( method_exists( static::api(), $name ) ) {
+            return call_user_func_array( [ static::api(), $name ], $arguments );
         } else {
             return new \WP_Error( 'hooks-api-invalid-call', 'Invalid hooks API call.' );
         }
     }
 
     public function __call( $name, $arguments ) {
-        return self::__callStatic( $name, $arguments );
+        return static::__callStatic( $name, $arguments );
     }
 
 }

@@ -4,7 +4,7 @@ use Brain\Striatum\Tests\HooksMock as H;
 
 class APITest extends \Brain\Striatum\Tests\FunctionalTestCase {
 
-    protected function api() {
+    private function api() {
         return $this->getBrain()->get( 'hooks.api' );
     }
 
@@ -411,7 +411,7 @@ class APITest extends \Brain\Striatum\Tests\FunctionalTestCase {
         assertEquals( [ 'first', 'second' ], $this->api()->callbackLastArgs( 'a_filter', 'foo' ) );
     }
 
-    function testxDoingPriorityFailsIfBadHook() {
+    function testDoingPriorityFailsIfBadHook() {
         assertIsWPError( $this->api()->doingPriority() );
     }
 
