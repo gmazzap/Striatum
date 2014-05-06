@@ -4,7 +4,7 @@ use Brain\Striatum\Tests\TestCase;
 
 class SubjectsManagerTest extends TestCase {
 
-    protected function getMocked( $id = '', $filter = FALSE ) {
+    private function getMocked( $id = '', $filter = FALSE ) {
         $bucket = \Mockery::mock( 'Brain\Striatum\Bucket' );
         $prototype = \Mockery::mock( 'Brain\Striatum\Subject' );
         $prototype->shouldReceive( 'getHooks' )->andReturn( $bucket );

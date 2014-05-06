@@ -16,5 +16,7 @@ interface HookInterface {
 
     function prepare( $args );
 
+    function check();
+
     function proxy();
 }

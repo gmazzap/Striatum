@@ -113,6 +113,18 @@ class HookTest extends TestCase {
         assertEquals( [ 'baz' ], $hook->getLastArgs() );
     }
 
+    function testProxyCutArgs() {
+        $hook = \Mockery::mock( 'Brain\Striatum\Hook' )->makePartial();
+        $hook->set();
+        $hook->set( 'args_num', 2 );
+        $subject = \Mockery::mock( 'Brain\Striatum\Subject' );
+        $hook->shouldReceive( 'check' )->atLeast( 1 )->withNoArgs()->andReturn( TRUE );
+        $hook->shouldReceive( 'getSubject' )->atLeast( 1 )->withNoArgs()->andReturn( $subject );
+        $hook->shouldReceive( 'update' )->atLeast( 1 )->with( $subject )->andReturn( 'bar' );
+        assertEquals( 'bar', $hook->proxy( 'foo', 'bar', 'baz' ) );
+        assertEquals( [ 'foo', 'bar' ], $hook->getLastArgs() );
+    }
+
     /**
      * @expectedException PHPUnit_Framework_Error
      */

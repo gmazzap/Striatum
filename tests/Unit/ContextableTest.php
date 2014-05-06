@@ -4,7 +4,7 @@ use Brain\Striatum\Tests\TestCase;
 
 class TestContextable extends TestCase {
 
-    protected function get() {
+    private function get() {
         return new \Brain\Striatum\Tests\ContextStub;
     }
 

@@ -18,7 +18,7 @@ class SubjectsManager implements SubjectsManagerInterface {
 
     public function getSubject( $id ) {
         $subject = $this->getSubjects( $id );
-        if ( ! $subject instanceof SubjectInterface ) {
+        if ( ! is_null( $subject ) && ! $subject instanceof SubjectInterface ) {
             throw new \DomainException;
         }
         return $subject;
@@ -26,7 +26,7 @@ class SubjectsManager implements SubjectsManagerInterface {
 
     public function getFrozenSubject( $id ) {
         $subject = $this->getFrozen( $id );
-        if ( ! $subject instanceof SubjectInterface ) {
+        if ( ! is_null( $subject ) && ! $subject instanceof SubjectInterface ) {
             throw new \DomainException;
         }
         return $subject;
@@ -37,11 +37,7 @@ class SubjectsManager implements SubjectsManagerInterface {
         if ( is_null( $subject ) ) {
             $prototype = $this->getPrototype();
             $subject = clone $prototype;
-            if ( ! $subject instanceof SubjectInterface ) {
-                throw new \DomainException;
-            }
-            $subject->setId( $id );
-            $subject->isFilter( $is_filter );
+            $subject->setId( $id )->isFilter( $is_filter );
             $this->setSubjects( $id, $subject );
         }
         return $subject;
@@ -58,8 +54,8 @@ class SubjectsManager implements SubjectsManagerInterface {
     public function freezeSubject( $id ) {
         $subject = $this->getSubject( $id );
         if ( $subject instanceof SubjectInterface ) {
-            $subject->removeAll();
             $this->setFrozen( $id, $subject );
+            $subject->removeAll();
             $this->unsetSubjects( $id );
         }
         return $subject;
@@ -137,7 +133,7 @@ class SubjectsManager implements SubjectsManagerInterface {
 
     public function checkSubjectIds( $ids ) {
         if ( is_string( $ids ) ) {
-            $ids = explode( ',', $ids );
+            $ids = array_map( 'trim', explode( '|', $ids ) );
         }
         if ( empty( $ids ) || ! is_array( $ids ) ) {
             throw new \InvalidArgumentException;

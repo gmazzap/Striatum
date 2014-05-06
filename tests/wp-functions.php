@@ -88,6 +88,14 @@ if ( ! function_exists( '__return_empty_string' ) ) {
 
 }
 
+if ( ! function_exists( '_wp_filter_build_unique_id' ) ) {
+
+    function _wp_filter_build_unique_id( $tag = NULL, $function = NULL, $priority = NULL ) {
+        Brain\Striatum\Tests\HooksMock::callbackUniqueId( $function );
+    }
+
+}
+
 if ( ! function_exists( 'add_action' ) ) {
 
     function add_action() {

@@ -6,12 +6,12 @@ use Brain\Striatum as S;
 
 class SubjectTest extends TestCase {
 
-    protected function get() {
+    private function get() {
         $bucket = \Mockery::mock( 'Brain\Striatum\Bucket' );
         return new S\Subject( $bucket );
     }
 
-    protected function getMocked( $id = NULL ) {
+    private function getMocked( $id = NULL ) {
         $bucket = \Mockery::mock( 'Brain\Striatum\Bucket' );
         $subject = \Mockery::mock( 'Brain\Striatum\Subject' )->makePartial();
         $subject->shouldReceive( 'getHooks' )->withNoArgs()->andReturn( $bucket );
@@ -26,8 +26,7 @@ class SubjectTest extends TestCase {
      * @expectedException PHPUnit_Framework_Error
      */
     function testAttachFailsIfNoHookGiven() {
-        $subject = $this->get();
-        $subject->attach();
+        $subject = $this->get()->attach();
     }
 
     /**
@@ -35,13 +34,22 @@ class SubjectTest extends TestCase {
      */
     function testAttachFailsIfBadHookGiven() {
         $observer = \Mockery::mock( 'SplObserver' );
-        $subject = $this->get();
-        $subject->attach( $observer );
+        $this->get()->attach( $observer );
+    }
+
+    /**
+     * @expectedException DomainException
+     */
+    function testAttachFailsIfBadHookNotPassCheck() {
+        $hook = \Mockery::mock( 'Brain\Striatum\Hook' );
+        $hook->shouldReceive( 'check' )->atLeast( 1 )->withNoArgs()->andReturn( FALSE );
+        $this->getMocked()->attach( $hook );
     }
 
     function testAttach() {
         $hook = \Mockery::mock( 'Brain\Striatum\Hook' );
         $hook->shouldReceive( 'set' )->atLeast( 1 )->withAnyArgs()->andReturnNull();
+        $hook->shouldReceive( 'check' )->atLeast( 1 )->withNoArgs()->andReturn( TRUE );
         $subject = $this->getMocked();
         $subject->shouldReceive( 'add' )->atLeast( 1 )->with( $hook )->andReturn( $hook );
         $bucket = $subject->getHooks();

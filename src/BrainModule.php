@@ -36,11 +36,11 @@ class BrainModule implements Module {
 
     function boot( Container $c ) {
         require_once $this->getPath() . 'Hooks.php';
-        Hooks::setApi( $c['hooks.api'] );
+        Hooks::setContainer( $c );
     }
 
     function getPath() {
-        return trailingslashit( dirname( plugin_dir_path( __FILE__ ) ) );
+        return trailingslashit( dirname( dirname( __FILE__ ) ) );
     }
 
 }

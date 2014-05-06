@@ -63,16 +63,17 @@ class API {
      *
      * @param string $hook          Action or filter to get the attached hooks for
      * @param boolean $get_subject  If true return the hook subject instead of hooks objects array
-     * @return \Brain\Striatum\SubjectsManager|array|\WP_Error
+     * @return \Brain\Striatum\SubjectsManager|array|void|\WP_Error
      * @since 0.1
      */
-    public function getHooks( $hook, $get_subject = FALSE ) {
+    public function getHooks( $hook = '', $get_subject = FALSE ) {
         if ( ! is_string( $hook ) || empty( $hook ) ) {
             return new \WP_Error( 'hooks-bad-id' );
         }
-        if ( ! isset( $this->hooks[$hook] ) || ! $this->hooks[$hook] instanceof SubjectInterface ) {
+        if ( isset( $this->hooks[$hook] ) && ! $this->hooks[$hook] instanceof SubjectInterface ) {
             return new \WP_Error( 'hooks-bad-subject' );
         }
+        if ( ! isset( $this->hooks[$hook] ) ) return;
         try {
             return $get_subject ? $this->hooks[$hook] : $this->hooks[$hook]->getHooksArray();
         } catch ( Exception $exc ) {
@@ -86,12 +87,12 @@ class API {
      *
      * @param string|\Brain\Striatum\SubjectInterface $hook Hook to get
      * @param string $id                                    Observer id
-     * @return \Brain\Striatum\HookInterface|\WP_Error
+     * @return \Brain\Striatum\HookInterface|void|\WP_Error
      * @since 0.1
      */
-    public function getHook( $hook, $id ) {
+    public function getHook( $hook = '', $id = '' ) {
         $hooks = $hook instanceof SubjectInterface ? $hook : $this->getHooks( $hook, TRUE );
-        if ( is_wp_error( $hooks ) ) {
+        if ( ! $hooks instanceof SubjectInterface ) {
             return $hooks;
         }
         try {
@@ -114,22 +115,22 @@ class API {
      * @param string $id            Observer id
      * @param array $args           Observer args: callback, priority, accepted args and allowed times.
      * @param string|array $hook    Action or filter hook, e.g. 'init' or 'the_title'
-     *                              Is possible to pass an array or a comma separed list of hook.
+     *                              Is possible to pass an array or a pipe separed list of hook.
      * @param boolean $is_filter    If true add a filter, otherwise an action
      * @return array|\Brain\Striatum\HookInterface|\WP_Error
      * @see \Brain\Striatum\API::addAction()
      * @see \Brain\Striatum\API::addFilter()
      * @since 0.1
      */
-    public function addHook( $id, $args, $hook = '', $is_filter = FALSE ) {
-        if ( ( ! is_string( $hook ) && ! is_array( $hook ) ) || empty( $hook ) ) {
-            return new \WP_Error( 'hooks-bad-hook-id' );
-        }
+    public function addHook( $id = '', $args = [ ], $hook = '', $is_filter = FALSE ) {
         if ( ! is_string( $id ) || empty( $id ) ) {
             return new \WP_Error( 'hooks-bad-hook' );
         }
+        if ( ( ! is_string( $hook ) && ! is_array( $hook ) ) || empty( $hook ) ) {
+            return new \WP_Error( 'hooks-bad-hook-id' );
+        }
         try {
-            $singular = is_string( $hook ) && ( substr_count( $hook, ',' ) === 0 );
+            $singular = is_string( $hook ) && ( substr_count( $hook, '|' ) === 0 );
             $subjects = $this->manager->addSubjects( $hook, $is_filter );
             $hookObject = clone $this->hook;
             $hookObject->prepare( $args );
@@ -149,15 +150,16 @@ class API {
      * If the given observer id does not exists the method act as addHook, adding a new hook.
      *
      * @param string $hook
-     * @param string|\Brain\Striatum\HookInterface $observer Action or filter hook, e.g. 'init'
-     * @param type $args                                    New observer params
-     * @param type $new_as_filter                           When the observer does not exists, a new one
-     *                                                      is created and if this param is true it's created
-     *                                                      as filter
+     * @param string|\Brain\Striatum\HookInterface $observer    Action or filter hook, e.g. 'init'
+     * @param type $args                                        New observer params
+     * @param type $is_filter                                   True if the hook is filter.
+     *                                                          It matters only if the observer is
+     *                                                          not found and method attemp to
+     *                                                          create a new one.
      * @return \Brain\Striatum\HookInterface|\WP_Error
      * @since 0.1
      */
-    public function updateHook( $hook, $observer, $args = [ ], $new_as_filter = FALSE ) {
+    public function updateHook( $hook = '', $observer = '', $args = [ ], $is_filter = FALSE ) {
         if ( ! is_string( $hook ) || empty( $hook ) ) {
             return new \WP_Error( 'hooks-bad-hook' );
         }
@@ -170,18 +172,19 @@ class API {
             if ( is_wp_error( $hookObject ) ) {
                 return $hookObject;
             }
-            try {
-                return $this->addHook( $observer, $args, $hook, $new_as_filter );
-            } catch ( Exception $exc ) {
-                return $this->errorFromException( $exc );
-            }
         }
-        if ( $hookObject instanceof HookInterface ) {
-            try {
-                return $hookObject->prepare( $args );
-            } catch ( Exception $exc ) {
-                return $this->errorFromException( $exc );
+        try {
+            if ( is_null( $hookObject ) ) {
+                return $this->addHook( $observer, $args, $hook, $is_filter );
+            } else {
+                $old = clone $hookObject;
+                $new = $hookObject->prepare( $args, $hookObject );
+                $this->maybeUpdateGlobal( $hook, $args, $old );
+                unset( $old );
+                return $new;
             }
+        } catch ( Exception $exc ) {
+            return $this->errorFromException( $exc );
         }
     }
 
@@ -193,11 +196,11 @@ class API {
      * The last is 'times' that makes the callaback run a given number of times, so creating
      * sort of self-removing observer.
      * Unlike core add_filter is possible to add the same observer to different hooks, passing an
-     * array or a comma separed list of filters.
+     * array or a pipe separed list of filters.
      *
      * @param string $id            Observer id
      * @param string|array $hook    Action or filter hook, e.g. 'init' or 'the_title'
-     *                              Is possible to pass an array or a comma separed list of hook.
+     *                              Is possible to pass an array or a pipe separed list of hook.
      * @param callable $callback    The callback to associate to observer
      * @param int $priority         Observer priority. Default 10.
      * @param int $args_num         Accepted arguments number. Default 1.
@@ -207,7 +210,7 @@ class API {
      * @see \add_filter()
      * @since 0.1
      */
-    public function addFilter( $id, $hook, $callback, $priority = 10, $args_num = 1, $times = 0 ) {
+    public function addFilter( $id = '', $hook = '', $callback = NULL, $priority = 10, $args_num = 1, $times = 0 ) {
         $args = compact( 'callback', 'priority', 'args_num', 'times' );
         return $this->addHook( $id, $args, $hook, TRUE );
     }
@@ -220,11 +223,11 @@ class API {
      * The last is 'times' that makes the callaback run a given number of times, so creating
      * sort of self-removing observer.
      * Unlike core add_action is possible to add the same observer to different hooks, passing an
-     * array or a comma separed list of action.
+     * array or a pipe separed list of action.
      *
      * @param string $id            Observer id
      * @param string|array $hook    Action or filter hook, e.g. 'init' or 'the_title'
-     *                              Is possible to pass an array or a comma separed list of hook.
+     *                              Is possible to pass an array or a pipe separed list of hook.
      * @param callable $callback    The callback to associate to observer
      * @param int $priority         Observer priority. Default 10.
      * @param int $args_num         Accepted arguments number. Default 1.
@@ -234,7 +237,7 @@ class API {
      * @see \add_action()
      * @since 0.1
      */
-    public function addAction( $id, $hook, $callback, $priority = 10, $args_num = 1, $times = 0 ) {
+    public function addAction( $id = '', $hook = '', $callback = NULL, $priority = 10, $args_num = 1, $times = 0 ) {
         $args = compact( 'callback', 'priority', 'args_num', 'times' );
         return $this->addHook( $id, $args, $hook, FALSE );
     }
@@ -250,14 +253,14 @@ class API {
      * @return void|\WP_Error
      * @since 0.1
      */
-    public function removeHook( $hook, $id ) {
+    public function removeHook( $hook = '', $id = '' ) {
         try {
             $hookObject = NULL;
             $subject = $this->manager->getSubject( $hook );
             if ( $subject instanceof SubjectInterface ) {
                 $hookObject = $subject->getHook( $id );
             }
-            if ( $hookObject instanceof HookInterface ) {
+            if ( $hookObject instanceof HookInterface && $hookObject instanceof \SplObserver ) {
                 $subject->detach( $hookObject );
             }
         } catch ( Exception $exc ) {
@@ -267,15 +270,15 @@ class API {
 
     /**
      * Remove all observers form an hook. Is similar to core remove_all_actions().
-     * However it accepts also an array or a comma separed lists of actions and/or filters to remove
+     * However it accepts also an array or a pipe separed lists of actions and/or filters to remove
      * all observers from different hooks.
      *
      * @param string|array $hooks   Action or filter hook, e.g. 'init' or 'the_title'
-     *                              Is possible to pass an array or a comma separed list of hook.
+     *                              Is possible to pass an array or a pipe separed list of hook.
      * @return void|\WP_Error
      * @since 0.1
      */
-    public function removeHooks( $hooks ) {
+    public function removeHooks( $hooks = '' ) {
         try {
             $this->manager->removeSubjects( $hooks );
         } catch ( Exception $exc ) {
@@ -286,16 +289,16 @@ class API {
     /**
      * Freezing an hook means that all the observer and their params are saved, however they are
      * temporarly suspended, so do nothing until they are not unfreezed.
-     * Is possible to freeze more than one hook with a single call, using an array or a comma
+     * Is possible to freeze more than one hook with a single call, using an array or a pipe
      * separed list of hook.
      *
      * @param string|array $hooks   Action or filter hook, e.g. 'init' or 'the_title'
-     *                              Is possible to pass an array or a comma separed list of hook.
+     *                              Is possible to pass an array or a pipe separed list of hook.
      * @return void|\WP_Error
      * @see \Brain\Striatum\API::unfreezeHooks()
      * @since 0.1
      */
-    public function freezeHooks( $hooks ) {
+    public function freezeHooks( $hooks = '' ) {
         try {
             $this->manager->freezeSubjects( $hooks );
         } catch ( Exception $exc ) {
@@ -307,12 +310,12 @@ class API {
      * Unfreeze one or more hooks previously frozen using freezeHooks()
      *
      * @param string|array $hooks   Action or filter hook, e.g. 'init' or 'the_title'
-     *                              Is possible to pass an array or a comma separed list of hook.
+     *                              Is possible to pass an array or a pipe separed list of hook.
      * @return void|\WP_Error
      * @see \Brain\Striatum\API::freezeHooks()
      * @since 0.1
      */
-    public function unfreezeHooks( $hooks ) {
+    public function unfreezeHooks( $hooks = '' ) {
         try {
             $this->manager->unfreezeSubjects( $hooks );
         } catch ( Exception $exc ) {
@@ -330,13 +333,13 @@ class API {
      *                      Nothing is returned for actions.
      * @since 0.1
      */
-    public function trigger( $hook ) {
+    public function trigger( $hook = '' ) {
         $hooks = $this->getHooks( $hook, TRUE );
-        if ( is_wp_error( $hooks ) ) {
+        if ( ! $hooks instanceof SubjectInterface ) {
             return $hooks;
         }
-        $all_args = func_get_args();
-        $args = func_get_arg( 1 ) ? array_slice( $all_args, 1 ) : [ ];
+        $all_args = array_values( func_get_args() );
+        $args = isset( $all_args[1] ) ? array_slice( $all_args, 1 ) : [ ];
         try {
             $result = $hooks->notify( $args );
             if ( $hooks->isFilter() ) return $result;
@@ -359,11 +362,11 @@ class API {
      * @see \apply_filters()
      * @since 0.1
      */
-    public function filter( $hook, $actual = NULL ) {
-        $all_args = func_get_args();
-        array_unshift( $all_args, $actual );
-        array_unshift( $all_args, $hook );
-        return call_user_func_array( [ $this, 'trigger' ], $all_args );
+    public function filter( $hook = '', $actual = NULL ) {
+        if ( ! $this->getHooks( $hook, TRUE ) instanceof SubjectInterface ) {
+            return $actual;
+        }
+        return call_user_func_array( [ $this, 'trigger' ], func_get_args() );
     }
 
     /**
@@ -379,10 +382,10 @@ class API {
      * @return boolean|\Brain\Striatum\HookInterface|\WP_Error
      * @since 0.1
      */
-    public function hookHas( $hook, $id, $return_hook = FALSE ) {
-        $hooks = $hook instanceof SubjectInterface ? $hook : $this->getHooks( $hook );
-        if ( is_wp_error( $hook ) ) {
-            return $hook;
+    public function hookHas( $hook = '', $id = '', $return_hook = FALSE ) {
+        $hooks = $hook instanceof SubjectInterface ? $hook : $this->getHooks( $hook, TRUE );
+        if ( is_wp_error( $hooks ) ) {
+            return $hooks;
         }
         if ( ! $hooks instanceof SubjectInterface ) {
             return FALSE;
@@ -408,12 +411,12 @@ class API {
      * @uses \Brain\Striatum\API::hookHas()
      * @since 0.1
      */
-    public function actionHas( $hook, $id ) {
+    public function actionHas( $hook = '', $id = '' ) {
         $hook = $this->hookHas( $hook, $id, TRUE );
         if ( is_wp_error( $hook ) ) {
             return $hook;
         }
-        return $hook instanceof HookInterface && ! $hook->isFilter();
+        return $hook instanceof HookInterface && ! $hook->getSubject()->isFilter();
     }
 
     /**
@@ -426,12 +429,12 @@ class API {
      * @uses \Brain\Striatum\API::hookHas()
      * @since 0.1
      */
-    public function filterHas( $hook, $id ) {
+    public function filterHas( $hook = '', $id = '' ) {
         $hook = $this->hookHas( $hook, $id, TRUE );
         if ( is_wp_error( $hook ) ) {
             return $hook;
         }
-        return $hook instanceof HookInterface && $hook->isFilter();
+        return $hook instanceof HookInterface && $hook->getSubject()->isFilter();
     }
 
     /**
@@ -443,10 +446,13 @@ class API {
      * @return boolean
      * @since 0.1
      */
-    public function callbackDoing( $hook, $id ) {
-        $hooks = $this->getHooks( $hook );
+    public function isDoingCallback( $hook = '', $id = '' ) {
+        $hooks = $this->getHooks( $hook, TRUE );
         if ( is_wp_error( $hooks ) ) {
             return $hooks;
+        }
+        if ( ! is_string( $id ) || empty( $id ) ) {
+            return new \WP_Error( 'hooks-bad-hook-id' );
         }
         return $hooks instanceof SubjectInterface && in_array( $id, (array) $hooks->calling );
     }
@@ -461,10 +467,13 @@ class API {
      * @return boolean
      * @since 0.1
      */
-    public function callbackDone( $hook, $id ) {
-        $hooks = $this->getHooks( $hook );
+    public function callbackDone( $hook = '', $id = '' ) {
+        $hooks = $this->getHooks( $hook, TRUE );
         if ( is_wp_error( $hooks ) ) {
             return $hooks;
+        }
+        if ( ! is_string( $id ) || empty( $id ) ) {
+            return new \WP_Error( 'hooks-bad-hook-id' );
         }
         return $hooks instanceof SubjectInterface ? in_array( $id, (array) $hooks->called ) : FALSE;
     }
@@ -476,8 +485,8 @@ class API {
      * @return void|string  Last observer id or null
      * @since 0.1
      */
-    public function callbackLast( $hook ) {
-        $hooks = $this->getHooks( $hook );
+    public function callbackLast( $hook = '' ) {
+        $hooks = $this->getHooks( $hook, TRUE );
         if ( is_wp_error( $hooks ) ) {
             return $hooks;
         }
@@ -492,7 +501,10 @@ class API {
      * @return array|void
      * @since 0.1
      */
-    public function callbackLastArgs( $hook, $id ) {
+    public function callbackLastArgs( $hook = '', $id = '' ) {
+        if ( ! is_string( $id ) || empty( $id ) ) {
+            return new \WP_Error( 'hooks-bad-hook-id' );
+        }
         $hook = $this->getHook( $hook, $id );
         if ( is_wp_error( $hook ) ) {
             return $hook;
@@ -509,8 +521,8 @@ class API {
      * @return int|boolean  Current priority or false
      * @since 0.1
      */
-    public function doingPriority( $hook ) {
-        $hooks = $this->getHooks( $hook );
+    public function doingPriority( $hook = '' ) {
+        $hooks = $this->getHooks( $hook, TRUE );
         if ( is_wp_error( $hooks ) ) {
             return $hooks;
         }
@@ -545,6 +557,23 @@ class API {
             $h->setId( $id );
             $h->setSubject( $s );
             return $s->attach( $h );
+        }
+    }
+
+    private function maybeUpdateGlobal( $tag, Array $new_args, HookInterface $old ) {
+        $new_priority = isset( $new_args['priority'] ) ? $new_args['priority'] : $old->priority;
+        $new_args_num = isset( $new_args['args_num'] ) ? $new_args['args_num'] : $old->args_num;
+        if ( (int) $new_priority !== $old->priority || (int) $new_args_num != $old->args_num ) {
+            $new_priority = (int) $new_priority;
+            global $wp_filter;
+            $cbid = _wp_filter_build_unique_id( $tag, [ $old, 'proxy' ], $old->priority );
+            if ( ! isset( $wp_filter[$tag] ) ) return;
+            if ( ! isset( $wp_filter[$tag][$old->priority] ) ) return;
+            if ( ! isset( $wp_filter[$tag][$old->priority][$cbid] ) ) return;
+            $filter_data = $wp_filter[$tag][$old->priority][$cbid];
+            unset( $wp_filter[$tag][$old->priority][$cbid] );
+            $filter_data['accepted_args'] = (int) $new_args_num;
+            $wp_filter[$tag][$new_priority][$cbid] = $filter_data;
         }
     }
 

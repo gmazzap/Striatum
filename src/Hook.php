@@ -1,6 +1,6 @@
 <?php namespace Brain\Striatum;
 
-class Hook implements HookInterface, \SplObserver {
+class Hook implements HookInterface, \SplObserver, \ArrayAccess {
 
     use Fullclonable,
         Contextable,
@@ -20,10 +20,21 @@ class Hook implements HookInterface, \SplObserver {
         return $this->get( $name );
     }
 
+    public function __set( $name, $value ) {
+        if ( array_key_exists( $name, $this->getEditable() ) ) {
+            $this->set( $name, $value );
+        }
+    }
+
     public function __call( $name, $arguments ) {
         if ( strpos( $name, 'get' ) === 0 && empty( $arguments ) ) {
             $name = strtolower( substr( $name, 3 ) );
             return $this->get( $name );
+        } elseif ( strpos( $name, 'set' ) === 0 && ! empty( $arguments[0] ) ) {
+            $name = strtolower( substr( $name, 3 ) );
+            if ( array_key_exists( $name, $this->getEditable() ) ) {
+                return $this->set( $name, $arguments[0] );
+            }
         } elseif ( strpos( $name, 'run' ) === 0 ) {
             $times = strtolower( substr( $name, 3 ) );
             $matches = [ ];
@@ -52,11 +63,15 @@ class Hook implements HookInterface, \SplObserver {
         return $this->get( 'subject' );
     }
 
-    public function prepare( $args ) {
+    public function prepare( $args, HookInterface $from_hook = NULL ) {
         if ( ! is_array( $args ) && ! is_string( $args ) ) {
             throw new \InvalidArgumentException;
         }
-        $def = [ 'priority' => 10, 'args_num' => 1, 'times' => 0, 'callback' => NULL ];
+        if ( ! is_null( $from_hook ) ) {
+            $def = $from_hook->getEditable();
+        } else {
+            $def = [ 'priority' => 10, 'args_num' => 1, 'times' => 0, 'callback' => NULL ];
+        }
         $args = wp_parse_args( $args, $def );
         if ( ! is_numeric( $args['priority'] ) ) {
             $args['priority'] = 10;
@@ -98,6 +113,24 @@ class Hook implements HookInterface, \SplObserver {
         }
     }
 
+    function check() {
+        $is_subject = $this->getSubject() instanceof SubjectInterface;
+        $id = $this->getId() ? : FALSE;
+        $callback = $this->get( 'callback' );
+        return $is_subject && is_string( $id ) && is_callable( $callback );
+    }
+
+    public function getEditable() {
+        $all = $this->get();
+        $cb = isset( $all['callback'] ) && is_callable( $all['callback'] ) ? $all['callback'] : NULL;
+        return [
+            'priority' => is_numeric( $all['priority'] ) ? (int) $all['priority'] : 10,
+            'args_num' => is_numeric( $all['args_num'] ) ? (int) $all['args_num'] : 10,
+            'times'    => is_numeric( $all['times'] ) ? (int) $all['times'] : 10,
+            'callback' => $cb
+        ];
+    }
+
     public function setLastArgs( $args = [ ] ) {
         if ( ! is_array( $args ) ) {
             throw new \InvalidArgumentException;
@@ -116,14 +149,7 @@ class Hook implements HookInterface, \SplObserver {
         return $this->set( 'times', (int) $n );
     }
 
-    function check() {
-        $sub = $this->getSubject() instanceof SubjectInterface;
-        $id = $this->getId() ? : FALSE;
-        $callback = $this->get( 'callback' );
-        return $sub && is_string( $id ) && is_callable( $callback );
-    }
-
-    function before( SubjectInterface $subject ) {
+    public function before( SubjectInterface $subject ) {
         $id = $this->getId();
         if ( empty( $id ) || ! is_string( $id ) ) {
             throw new \InvalidArgumentException;
@@ -139,7 +165,7 @@ class Hook implements HookInterface, \SplObserver {
         return $this;
     }
 
-    function after( SubjectInterface $subject ) {
+    public function after( SubjectInterface $subject ) {
         $id = $this->getId();
         if ( empty( $id ) || ! is_string( $id ) ) {
             throw new \InvalidArgumentException;
@@ -157,6 +183,22 @@ class Hook implements HookInterface, \SplObserver {
             return $subject->detach( $this );
         }
         return $this;
+    }
+
+    public function offsetExists( $offset ) {
+        return ! is_null( $this->get( $offset ) );
+    }
+
+    public function offsetGet( $offset ) {
+        return $this->get( $offset );
+    }
+
+    public function offsetSet( $offset, $value ) {
+        return $this->set( $offset, $value );
+    }
+
+    public function offsetUnset( $offset ) {
+        $this->unsetContext( 'context', $offset );
     }
 
 }
