@@ -2,7 +2,7 @@
 
 use Brain\Striatum\Tests\TestCase;
 
-class TestContextable extends TestCase {
+class ContextableTest extends TestCase {
 
     private function get() {
         return new \Brain\Striatum\Tests\ContextStub;
@@ -36,7 +36,7 @@ class TestContextable extends TestCase {
         $context = $this->get();
         $context->context['foo'] = 'bar';
         assertTrue( $context->context->offsetExists( 'foo' ) );
-        $context->setContext( 'context' );
+        $context->resetContext( 'context' );
         assertFalse( $context->context->offsetExists( 'foo' ) );
     }
 

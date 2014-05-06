@@ -2,7 +2,7 @@
 
 class SubjectsManager implements SubjectsManagerInterface {
 
-    use Contextable;
+    use \Brain\Contextable;
 
     protected $subjects;
 

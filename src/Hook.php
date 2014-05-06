@@ -2,9 +2,9 @@
 
 class Hook implements HookInterface, \SplObserver, \ArrayAccess {
 
-    use Fullclonable,
-        Contextable,
-        Idable;
+    use \Brain\Fullclonable,
+        \Brain\Contextable,
+        \Brain\Idable;
 
     protected $id;
 

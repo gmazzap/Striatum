@@ -2,9 +2,9 @@
 
 class Subject implements SubjectInterface, \SplSubject {
 
-    use Fullclonable,
-        Contextable,
-        Idable;
+    use \Brain\Fullclonable,
+        \Brain\Contextable,
+        \Brain\Idable;
 
     protected $id;
 

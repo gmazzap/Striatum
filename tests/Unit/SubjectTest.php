@@ -170,7 +170,7 @@ class SubjectTest extends TestCase {
         assertEquals( 'bar', $subject->getInfo( 'foo' ) );
         assertEquals( 'baz', $subject->getInfo( 'bar' ) );
         assertNull( $subject->getInfo( 'baz' ) );
-        $subject->setInfo();
+        $subject->resetContext( 'context' );
         assertEquals( [ ], $subject->getInfo() );
     }
 

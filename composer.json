@@ -16,7 +16,8 @@
     "license": "GPL-2.0+",
     "require": {
         "php": ">=5.4",
-        "brain/brain": "dev-master"
+        "brain/brain": "dev-master",
+        "brain/support": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.*",

@@ -77,7 +77,7 @@ class API {
         try {
             return $get_subject ? $this->hooks[$hook] : $this->hooks[$hook]->getHooksArray();
         } catch ( Exception $exc ) {
-            return $this->errorFromException( $exc );
+            return \Brain\exception2WPError( $exc );
         }
     }
 
@@ -98,7 +98,7 @@ class API {
         try {
             return $hooks->getHook( $id );
         } catch ( Exception $exc ) {
-            return $this->errorFromException( $exc );
+            return \Brain\exception2WPError( $exc );
         }
     }
 
@@ -140,7 +140,7 @@ class API {
             }
             return $singular ? array_shift( $added ) : $added;
         } catch ( Exception $exc ) {
-            return $this->errorFromException( $exc );
+            return \Brain\exception2WPError( $exc );
         }
     }
 
@@ -184,7 +184,7 @@ class API {
                 return $new;
             }
         } catch ( Exception $exc ) {
-            return $this->errorFromException( $exc );
+            return \Brain\exception2WPError( $exc );
         }
     }
 
@@ -264,7 +264,7 @@ class API {
                 $subject->detach( $hookObject );
             }
         } catch ( Exception $exc ) {
-            return $this->errorFromException( $exc );
+            return \Brain\exception2WPError( $exc );
         }
     }
 
@@ -282,7 +282,7 @@ class API {
         try {
             $this->manager->removeSubjects( $hooks );
         } catch ( Exception $exc ) {
-            return $this->errorFromException( $exc );
+            return \Brain\exception2WPError( $exc );
         }
     }
 
@@ -302,7 +302,7 @@ class API {
         try {
             $this->manager->freezeSubjects( $hooks );
         } catch ( Exception $exc ) {
-            return $this->errorFromException( $exc );
+            return \Brain\exception2WPError( $exc );
         }
     }
 
@@ -319,7 +319,7 @@ class API {
         try {
             $this->manager->unfreezeSubjects( $hooks );
         } catch ( Exception $exc ) {
-            return $this->errorFromException( $exc );
+            return \Brain\exception2WPError( $exc );
         }
     }
 
@@ -345,7 +345,7 @@ class API {
             if ( $hooks->isFilter() ) return $result;
         } catch ( Exception $exc ) {
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                return $this->errorFromException( $exc );
+                return \Brain\exception2WPError( $exc );
             }
             if ( $hooks->isFilter() ) return $args[0];
         }
@@ -397,7 +397,7 @@ class API {
             }
             return FALSE;
         } catch ( Exception $exc ) {
-            return $this->errorFromException( $exc );
+            return \Brain\exception2WPError( $exc );
         }
     }
 
@@ -528,19 +528,6 @@ class API {
         }
         $is = $hooks instanceof SubjectInterface ? $hooks->priority_now : FALSE;
         return is_int( $is ) ? $is : FALSE;
-    }
-
-    /**
-     * Convert an exception to a WP_Error.
-     *
-     * @return \WP_Error
-     * @access private
-     */
-    private function errorFromException( Exception $exc ) {
-        $name = get_class( $exc );
-        $name .= $exc->getCode() ? '-' . $exc->getCode() : '';
-        $msg = $exc->getMessage() ? : '';
-        return new \WP_Error( 'hooks-exception-' . $name, $msg );
     }
 
     /**

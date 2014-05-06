@@ -2,7 +2,7 @@
 
 class ContextStub {
 
-    use \Brain\Striatum\Contextable;
+    use \Brain\Contextable;
 
     public $context;
 
