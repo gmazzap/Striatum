@@ -4,6 +4,12 @@ use Brain\Container;
 use Brain\Module;
 use Brain\Hooks;
 
+/**
+ * Brain module implementation
+ *
+ * @package Brain\Striatum
+ * @see https://github.com/Giuseppe-Mazzapica/Brain
+ */
 class BrainModule implements Module {
 
     function getBindings( Container $c ) {
