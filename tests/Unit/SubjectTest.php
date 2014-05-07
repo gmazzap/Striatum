@@ -1,7 +1,7 @@
 <?php namespace Brain\Striatum\Tests\Unit;
 
 use Brain\Striatum\Tests\TestCase;
-use Brain\Striatum\Tests\HooksMock as HM;
+use Brain\HooksMock\HooksMock as HM;
 use Brain\Striatum as S;
 
 class SubjectTest extends TestCase {
@@ -115,7 +115,7 @@ class SubjectTest extends TestCase {
     }
 
     /**
-     * @expectedException Brain\Striatum\Tests\HookException
+     * @expectedException Brain\HooksMock\HookException
      */
     function testRemove() {
         $hook = \Mockery::mock( 'Brain\Striatum\Hook' );
@@ -130,7 +130,7 @@ class SubjectTest extends TestCase {
     }
 
     /**
-     * @expectedException Brain\Striatum\Tests\HookException
+     * @expectedException Brain\HooksMock\HookException
      */
     function testRemoveWhenIsFilter() {
         $hook = \Mockery::mock( 'Brain\Striatum\Hook' );

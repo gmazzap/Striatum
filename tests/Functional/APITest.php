@@ -1,6 +1,6 @@
 <?php namespace Brain\Striatum\Tests\Functional;
 
-use Brain\Striatum\Tests\HooksMock as H;
+use Brain\HooksMock\HooksMock as H;
 
 class APITest extends \Brain\Striatum\Tests\FunctionalTestCase {
 
