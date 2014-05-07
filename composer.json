@@ -1,6 +1,6 @@
 {
     "name": "brain/striatum",
-    "description": "Observer pattern package for WordPress hooks",
+    "description": "Observer pattern package and API for WordPress hooks.",
     "authors": [
         {
             "name": "Giuseppe Mazzapica",
