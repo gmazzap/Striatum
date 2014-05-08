@@ -28,7 +28,8 @@
         "files": ["boot.php"],
         "psr-4": {
             "Brain\\Striatum\\": "src/"
-        }
+        },
+        "classmap": ["Hooks.php"]
     },
     "autoload-dev": {
         "psr-4": {
