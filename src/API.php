@@ -98,7 +98,7 @@ class API {
         try {
             return $hooks->getHook( $id );
         } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc );
+            return \Brain\exception2WPError( $exc, 'hooks' );
         }
     }
 
@@ -139,7 +139,7 @@ class API {
             }
             return $singular ? array_shift( $added ) : $added;
         } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc );
+            return \Brain\exception2WPError( $exc, 'hooks' );
         }
     }
 
@@ -183,7 +183,7 @@ class API {
                 return $new;
             }
         } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc );
+            return \Brain\exception2WPError( $exc, 'hooks' );
         }
     }
 
@@ -263,7 +263,7 @@ class API {
                 $subject->detach( $hookObject );
             }
         } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc );
+            return \Brain\exception2WPError( $exc, 'hooks' );
         }
     }
 
@@ -281,7 +281,7 @@ class API {
         try {
             $this->manager->removeSubjects( $hooks );
         } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc );
+            return \Brain\exception2WPError( $exc, 'hooks' );
         }
     }
 
@@ -301,7 +301,7 @@ class API {
         try {
             $this->manager->freezeSubjects( $hooks );
         } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc );
+            return \Brain\exception2WPError( $exc, 'hooks' );
         }
     }
 
@@ -318,7 +318,7 @@ class API {
         try {
             $this->manager->unfreezeSubjects( $hooks );
         } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc );
+            return \Brain\exception2WPError( $exc, 'hooks' );
         }
     }
 
@@ -344,7 +344,7 @@ class API {
             if ( $hooks->isFilter() ) return $result;
         } catch ( Exception $exc ) {
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                return \Brain\exception2WPError( $exc );
+                return \Brain\exception2WPError( $exc, 'hooks' );
             }
             if ( $hooks->isFilter() ) return $args[0];
         }
@@ -396,7 +396,7 @@ class API {
             }
             return FALSE;
         } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc );
+            return \Brain\exception2WPError( $exc, 'hooks' );
         }
     }
 
