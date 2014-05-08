@@ -11,7 +11,7 @@ It is also a [Brain][6] module.
 
  - [Quick Start](#quick-start)
  - [Features](#features)
- - [Knowing More](#knowing-more)
+ - [More Info](#more-info)
   - [WordPress core compatible](#wordpress-core-compatible)
   - [The key "hook id" concept](#the-key-hook-id-concept)
   - [API](#API)
