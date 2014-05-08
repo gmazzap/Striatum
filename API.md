@@ -267,7 +267,9 @@ From the retrieved hook object is possible to get some properties, like priority
     
     $callback = $my_plugin_init['callback'];
     
-These methods, are **not** available to set properties, at least not for all properties. The properties that can be set using these methods are 'callback' and 'times'.
+Same methods can be used for another property: `'debug'`. This property is only available whn `WP_DEBUG` is set to true, and is filled using `debug_backtrace` when the hook is added.
+    
+The get methods, are **not** available to set properties, at least not for all properties. The properties that can be set using these methods are only 'callback' and 'times'.
 
 Regarding 'times', there are also some alias that can be used, e.g. `runOnce()`,  `runTwice()` or `run{$n}times()` where `{$n}` can be replaced with any number, e.g. `run3times()`, `run7times()` and so on.
 
