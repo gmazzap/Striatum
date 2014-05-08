@@ -363,17 +363,17 @@ class APITest extends \Brain\Striatum\Tests\FunctionalTestCase {
     }
 
     function testxIsDoingCallbackFailsIfBadHook() {
-        assertIsWPError( $this->api()->isDoingCallback() );
+        assertIsWPError( $this->api()->doingCallback() );
     }
 
     function testIsDoingCallbackFailsIfBadId() {
-        assertIsWPError( $this->api()->isDoingCallback( 'foo' ) );
+        assertIsWPError( $this->api()->doingCallback( 'foo' ) );
     }
 
     function testIsDoingCallback() {
         $doing = FALSE;
         $cb = function() use( &$doing ) {
-            $doing = (bool) $this->api()->isDoingCallback( 'an_action', 'foo' );
+            $doing = (bool) $this->api()->doingCallback( 'an_action', 'foo' );
         };
         $test = $this->api()->addHook( 'foo', [ 'callback' => $cb ], 'an_action' );
         $test->proxy();

@@ -104,13 +104,12 @@ class API {
 
     /**
      * Add an observer to an hook. This is the homologous of core add_action and add_filter.
-     * the two types of hook are differentiated via $is_filter param.
+     * The two types of hook are differentiated via $is_filter param.
      * This method is designed differently from core functions, but the two methods that make use it,
      * addFilter and addAction accepts same arguments of core ones.
      * Only additional arguments is 'times', that makes the callaback runs a given number of times.
      * Using this method is possible to add same callback to more than one hook.
      * Return the array of observer objects added or the single instance when only one is added.
-     *
      *
      * @param string $id            Observer id
      * @param array $args           Observer args: callback, priority, accepted args and allowed times.
@@ -149,10 +148,10 @@ class API {
      * Every aspect of the observer can be changed.
      * If the given observer id does not exists the method act as addHook, adding a new hook.
      *
-     * @param string $hook
-     * @param string|\Brain\Striatum\HookInterface $observer    Action or filter hook, e.g. 'init'
-     * @param type $args                                        New observer params
-     * @param type $is_filter                                   True if the hook is filter.
+     * @param string $hook                                      Action or filter hook, e.g. 'init'
+     * @param string|\Brain\Striatum\HookInterface $observer    Obsever id or object
+     * @param array $args                                        New observer arguments
+     * @param bool $is_filter                                   True if the hook is filter.
      *                                                          It matters only if the observer is
      *                                                          not found and method attemp to
      *                                                          create a new one.
@@ -446,7 +445,7 @@ class API {
      * @return boolean
      * @since 0.1
      */
-    public function isDoingCallback( $hook = '', $id = '' ) {
+    public function doingCallback( $hook = '', $id = '' ) {
         $hooks = $this->getHooks( $hook, TRUE );
         if ( is_wp_error( $hooks ) ) {
             return $hooks;

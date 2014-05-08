@@ -21,7 +21,7 @@ class Hook implements HookInterface, \SplObserver, \ArrayAccess {
     }
 
     public function __set( $name, $value ) {
-        if ( array_key_exists( $name, $this->getEditable() ) ) {
+        if ( in_array( $name, [ 'callback', 'times' ], TRUE ) ) {
             $this->set( $name, $value );
         }
     }
@@ -32,7 +32,7 @@ class Hook implements HookInterface, \SplObserver, \ArrayAccess {
             return $this->get( $name );
         } elseif ( strpos( $name, 'set' ) === 0 && ! empty( $arguments[0] ) ) {
             $name = strtolower( substr( $name, 3 ) );
-            if ( array_key_exists( $name, $this->getEditable() ) ) {
+            if ( in_array( $name, [ 'callback', 'times' ], TRUE ) ) {
                 return $this->set( $name, $arguments[0] );
             }
         } elseif ( strpos( $name, 'run' ) === 0 ) {
