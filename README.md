@@ -167,7 +167,7 @@ Striatum own code is licensed under GPLv2+. Through Composer, it install code fr
  - [Pimple][24] (MIT) - required by Brain -
  - [PHPUnit][25] (BSD-3-Clause) - only dev install -
  - [Mockery][26] (BSD-3-Clause) - only dev install -
- - [HooksMock][27] (BSD-3-Clause) - only dev install -
+ - [HooksMock][27] (GPLv2+) - only dev install -
 
 
   [1]: https://googledrive.com/host/0Bxo4bHbWEkMscmJNYkx6YXctaWM/striatum.png
