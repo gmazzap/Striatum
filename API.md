@@ -15,25 +15,25 @@ Alternatively, is possible to use method using an instance of same class:
 Index
 -----
 
- - [addAction](#addAction)
- - [addFilter](#addFilter)
- - [addHook](#addHook)
+ - [addAction](#addaction)
+ - [addFilter](#addfilter)
+ - [addHook](#addhook)
  - [trigger](#trigger)
  - [filter](#filter)
- - [updateHook](#updateHook)
- - [getHooks](#getHooks)
- - [getHook](#getHook)
- - [removeHook](#removeHook)
- - [removeHooks](#removeHooks)
- - [freezeHooks](#freezeHooks)
- - [unfreezeHooks](#unfreezeHooks)
- - [hookHas](#hookHas)
- - [actionHas](#actionHas)
- - [filterHas](#filterHas)
- - [doingCallback](#doingCallback)
- - [callbackDone](#callbackDone)
- - [callbackLastArgs](#callbackLastArgs)
- - [doingPriority](#doingPriority)
+ - [updateHook](#updatehook)
+ - [getHooks](#gethooks)
+ - [getHook](#gethook)
+ - [removeHook](#removehook)
+ - [removeHooks](#removehooks)
+ - [freezeHooks](#freezehooks)
+ - [unfreezeHooks](#unfreezehooks)
+ - [hookHas](#hookhas)
+ - [actionHas](#actionhas)
+ - [filterHas](#filterhas)
+ - [doingCallback](#doingcallback)
+ - [callbackDone](#callbackdone)
+ - [callbackLastArgs](#callbacklastargs)
+ - [doingPriority](#doingpriority)
 
 addAction
 -------------
@@ -48,7 +48,7 @@ array or a pipe separed list of action.
 
 ###Signature###
      
-    public function addAction( $id = '', $hook = '', $callback = NULL, $priority = 10, $args_num = 1, $times = 0 )
+    public function addAction($id='', $hook='', $callback=NULL, $priority=10, $args_num=1, $times=0)
 
 ###Params###
 
@@ -67,7 +67,9 @@ If more than one hook is added it return an array oh hook objects. If only one h
     
 Once the method returns an hook objects is possible to call on it some methods to set properties, e.g.
 
-    $action = Brain\Hooks::addAction( 'foo_action', 'init', 'a_callback')->setPriority(10)->setTimes(4);
+    $action = Brain\Hooks::addAction( 'foo_action', 'init', 'a_callback')
+             ->setPriority(10)
+             ->setTimes(4);
     
 Regarding `setTimes` methods, there are some alias that can be used, e.g. `runOnce()`,  `runTwice()` or `run{$n}times()` where `{$n}` can be replaced with any number, e.g. `run3times()`, `run7times()` and so on.
 
@@ -86,7 +88,7 @@ Unlike core add_filter is possible to add the same observer to different hooks, 
 
 ###Signature###
      
-    public function addFilter( $id = '', $hook = '', $callback = NULL, $priority = 10, $args_num = 1, $times = 0 )
+    public function addFilter($id='', $hook='', $callback=NULL, $priority=10, $args_num=1, $times=0)
 
 ###Params###
 
@@ -105,7 +107,9 @@ If more than one hook is added it return an array oh hook objects. If only one h
     
 Once the method returns an hook objects is possible to call on it some methods to set properties, e.g.
 
-    $filter = Brain\Hooks::addFilter( 'foo_filter', 'the_title', 'a_callback')->setPriority(10)->setTimes(4);
+    $filter = Brain\Hooks::addFilter( 'foo_filter', 'the_title', 'a_callback')
+              ->setPriority(10)
+              ->setTimes(4);
     
 Regarding `setTimes` methods, there are some alias that can be used, e.g. `runOnce()`,  `runTwice()` or `run{$n}times()` where `{$n}` can be replaced with any number, e.g. `run3times()`, `run7times()` and so on.
 
@@ -281,7 +285,7 @@ Following 5 lines do the same thing:
      
 Same methods (but the last one) can be used to change 'callback' property.
 
-To be able to edit all the properties, use the [`updateHook`](#updateHook) method.
+To be able to edit all the properties, use the [`updateHook`](#updatehook) method.
 
 
 ----------
@@ -335,7 +339,7 @@ Following 5 lines do the same thing:
      
 Same methods (but the last one) can be used to change 'callback' property.
 
-To be able to edit all the properties, use the [`updateHook`](#updateHook) method. 
+To be able to edit all the properties, use the [`updateHook`](#updatehook) method. 
 
 ----------
 
