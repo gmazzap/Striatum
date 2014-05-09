@@ -40,7 +40,7 @@ or fire a custom action or filter
     
     $filtered = Brain\Hooks::filter( 'bar_filter', $unfiltered, $optional_arg1 ); // filter
 
-All the functions available through the `Brain\Hooks` API facade are documented in the API doc page. (Before teasing the *static* approach, read [here](#API)).
+All the functions available through the `Brain\Hooks` API facade are documented in the API doc page. (Before teasing the *static* approach, read [here](#api)).
 
 ##Features##
 
