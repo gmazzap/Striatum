@@ -14,7 +14,7 @@ It is also a [Brain][6] module.
  - [More Info](#more-info)
   - [WordPress core compatible](#wordpress-core-compatible)
   - [The key "hook id" concept](#the-key-hook-id-concept)
-  - [API](#API)
+  - [API](#api)
   - [Embed in OOP projects](#embed-in-oop-projects)
   - [Gotchas!](#gotchas)
   - [Requirements](#requirements)
@@ -25,7 +25,7 @@ It is also a [Brain][6] module.
 
 ##Read also##
 
- - [API documentation](/API.md)
+ - [API documentation](https://github.com/Giuseppe-Mazzapica/Striatum/blob/master/API.md)
   
 ##Quick Start##
 Striatum is very easy to use, e.g. adding an action is as easy as:
@@ -77,7 +77,7 @@ The facade class is named `Hooks` inside Brain namespace. Using it, add an hook 
 
 `addAction` method is designed using almost same signature of core `add_action` function, so take almost same arguments. It differs for first argument that is the hook id: using `'plugin.init'`, is possible to retrieve, to edit, to remove and to debug the hook added.
 
-All the functions available through the `Brain\Hooks` facade are documented in the [API documentation](/API.md).
+All the functions available through the `Brain\Hooks` facade are documented in the [API documentation](https://github.com/Giuseppe-Mazzapica/Striatum/blob/master/API.md).
 
 ###Embed in OOP projects###
 
