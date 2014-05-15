@@ -272,7 +272,7 @@ class API {
      * @since 0.1
      */
     public function freezeHooks( $hooks = '' ) {
-        $this->manager->removeSubjects( $hooks );
+        $this->manager->freezeSubjects( $hooks );
     }
 
     /**
@@ -285,7 +285,7 @@ class API {
      * @since 0.1
      */
     public function unfreezeHooks( $hooks = '' ) {
-        $this->manager->removeSubjects( $hooks );
+        $this->manager->unfreezeSubjects( $hooks );
     }
 
     /**

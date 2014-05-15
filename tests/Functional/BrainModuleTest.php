@@ -14,7 +14,6 @@ class BrainModuleTest extends \Brain\Striatum\Tests\FunctionalTestCase {
         assertInstanceOf( $ns . 'Subject', $this->getBrain()->get( 'striatum.subject' ) );
         assertInstanceOf( $ns . 'Hook', $this->getBrain()->get( 'striatum.hook' ) );
         assertInstanceOf( $ns . 'SubjectsManager', $this->getBrain()->get( 'striatum.manager' ) );
-        //assertInstanceOf( $ns . 'API', $this->getBrain()->get( 'hooks.api' ) );
     }
 
     function testHooks() {

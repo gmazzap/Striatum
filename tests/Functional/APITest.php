@@ -5,7 +5,7 @@ use Brain\HooksMock\HooksMock as H;
 class APITest extends \Brain\Striatum\Tests\FunctionalTestCase {
 
     private function api() {
-        return $this->getBrain()->get( 'hooks.api' );
+        return new \Brain\Hooks;
     }
 
     private function addSomeHooks() {
