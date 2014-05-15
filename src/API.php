@@ -22,9 +22,7 @@ use Brain\Striatum\SubjectsManager as Manager;
  * remove_action and remove_filter are used to remove hooks.
  *
  * This class *glues* all the classes of Striatum package and ease the access to package features
- * giving methods built using same *flavor* of core functions, and gives consistency on returned
- * objects: on error all methods return a WP_Error instance: every exception thrown by package
- * classes is converted to a WP_Error.
+ * giving methods built using same *flavor* of core functions.
  *
  * ##############################################################################################
  * Please note that ALL the methods in this class and in other package classes have effect on
@@ -74,11 +72,7 @@ class API {
             return new \WP_Error( 'hooks-bad-subject' );
         }
         if ( ! isset( $this->hooks[$hook] ) ) return;
-        try {
-            return $get_subject ? $this->hooks[$hook] : $this->hooks[$hook]->getHooksArray();
-        } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc );
-        }
+        return $get_subject ? $this->hooks[$hook] : $this->hooks[$hook]->getHooksArray();
     }
 
     /**
@@ -95,11 +89,7 @@ class API {
         if ( ! $hooks instanceof SubjectInterface ) {
             return $hooks;
         }
-        try {
-            return $hooks->getHook( $id );
-        } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc, 'hooks' );
-        }
+        return $hooks->getHook( $id );
     }
 
     /**
@@ -128,19 +118,15 @@ class API {
         if ( ( ! is_string( $hook ) && ! is_array( $hook ) ) || empty( $hook ) ) {
             return new \WP_Error( 'hooks-bad-hook-id' );
         }
-        try {
-            $singular = is_string( $hook ) && ( substr_count( $hook, '|' ) === 0 );
-            $subjects = $this->manager->addSubjects( $hook, $is_filter );
-            $hookObject = clone $this->hook;
-            $hookObject->prepare( $args );
-            $added = [ ];
-            foreach ( $subjects as $subject ) {
-                $added[] = $this->addSubjectHook( $subject, $hookObject, $hook, $id, $args );
-            }
-            return $singular ? array_shift( $added ) : $added;
-        } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc, 'hooks' );
+        $singular = is_string( $hook ) && ( substr_count( $hook, '|' ) === 0 );
+        $subjects = $this->manager->addSubjects( $hook, $is_filter );
+        $hookObject = clone $this->hook;
+        $hookObject->prepare( $args );
+        $added = [ ];
+        foreach ( $subjects as $subject ) {
+            $added[] = $this->addSubjectHook( $subject, $hookObject, $hook, $id, $args );
         }
+        return $singular ? array_shift( $added ) : $added;
     }
 
     /**
@@ -172,18 +158,14 @@ class API {
                 return $hookObject;
             }
         }
-        try {
-            if ( is_null( $hookObject ) ) {
-                return $this->addHook( $observer, $args, $hook, $is_filter );
-            } else {
-                $old = clone $hookObject;
-                $new = $hookObject->prepare( $args, $hookObject );
-                $this->maybeUpdateGlobal( $hook, $args, $old );
-                unset( $old );
-                return $new;
-            }
-        } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc, 'hooks' );
+        if ( is_null( $hookObject ) ) {
+            return $this->addHook( $observer, $args, $hook, $is_filter );
+        } else {
+            $old = clone $hookObject;
+            $new = $hookObject->prepare( $args, $hookObject );
+            $this->maybeUpdateGlobal( $hook, $args, $old );
+            unset( $old );
+            return $new;
         }
     }
 
@@ -253,17 +235,13 @@ class API {
      * @since 0.1
      */
     public function removeHook( $hook = '', $id = '' ) {
-        try {
-            $hookObject = NULL;
-            $subject = $this->manager->getSubject( $hook );
-            if ( $subject instanceof SubjectInterface ) {
-                $hookObject = $subject->getHook( $id );
-            }
-            if ( $hookObject instanceof HookInterface && $hookObject instanceof \SplObserver ) {
-                $subject->detach( $hookObject );
-            }
-        } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc, 'hooks' );
+        $hookObject = NULL;
+        $subject = $this->manager->getSubject( $hook );
+        if ( $subject instanceof SubjectInterface ) {
+            $hookObject = $subject->getHook( $id );
+        }
+        if ( $hookObject instanceof HookInterface && $hookObject instanceof \SplObserver ) {
+            $subject->detach( $hookObject );
         }
     }
 
@@ -278,11 +256,7 @@ class API {
      * @since 0.1
      */
     public function removeHooks( $hooks = '' ) {
-        try {
-            $this->manager->removeSubjects( $hooks );
-        } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc, 'hooks' );
-        }
+        $this->manager->removeSubjects( $hooks );
     }
 
     /**
@@ -298,11 +272,7 @@ class API {
      * @since 0.1
      */
     public function freezeHooks( $hooks = '' ) {
-        try {
-            $this->manager->freezeSubjects( $hooks );
-        } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc, 'hooks' );
-        }
+        $this->manager->removeSubjects( $hooks );
     }
 
     /**
@@ -315,11 +285,7 @@ class API {
      * @since 0.1
      */
     public function unfreezeHooks( $hooks = '' ) {
-        try {
-            $this->manager->unfreezeSubjects( $hooks );
-        } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc, 'hooks' );
-        }
+        $this->manager->removeSubjects( $hooks );
     }
 
     /**
@@ -339,15 +305,8 @@ class API {
         }
         $all_args = array_values( func_get_args() );
         $args = isset( $all_args[1] ) ? array_slice( $all_args, 1 ) : [ ];
-        try {
-            $result = $hooks->notify( $args );
-            if ( $hooks->isFilter() ) return $result;
-        } catch ( Exception $exc ) {
-            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                return \Brain\exception2WPError( $exc, 'hooks' );
-            }
-            if ( $hooks->isFilter() ) return $args[0];
-        }
+        $result = $hooks->notify( $args );
+        if ( $hooks->isFilter() ) return $result;
     }
 
     /**
@@ -389,15 +348,11 @@ class API {
         if ( ! $hooks instanceof SubjectInterface ) {
             return FALSE;
         }
-        try {
-            $hook = $hooks->getHook( $id );
-            if ( $hook instanceof HookInterface ) {
-                return $return_hook ? $hook : TRUE;
-            }
-            return FALSE;
-        } catch ( Exception $exc ) {
-            return \Brain\exception2WPError( $exc, 'hooks' );
+        $hook = $hooks->getHook( $id );
+        if ( $hook instanceof HookInterface ) {
+            return $return_hook ? $hook : TRUE;
         }
+        return FALSE;
     }
 
     /**

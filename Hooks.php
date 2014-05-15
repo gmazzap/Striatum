@@ -1,7 +1,5 @@
 <?php namespace Brain;
 
-use \Brain\Container as Brain;
-
 /**
  * Hooks Class
  *
@@ -29,32 +27,14 @@ use \Brain\Container as Brain;
  * @package Brain\Striatum
  * @version 0.1
  */
-class Hooks {
+class Hooks extends Facade {
 
-    private static $container;
-
-    public static function setContainer( Brain $container ) {
-        static::$container = $container;
-        return static::$container;
+    static function getBindId() {
+        return 'hooks.api';
     }
 
-    public static function api() {
-        return static::$container->get( 'hooks.api' );
-    }
-
-    public static function __callStatic( $name, $arguments ) {
-        if ( ! static::$container instanceof Brain || ! static::api() instanceof Striatum\API ) {
-            return new \WP_Error( 'hooks-api-not-ready', 'Hooks API object is not ready.' );
-        }
-        if ( method_exists( static::api(), $name ) ) {
-            return call_user_func_array( [ static::api(), $name ], $arguments );
-        } else {
-            return new \WP_Error( 'hooks-api-invalid-call', 'Invalid hooks API call.' );
-        }
-    }
-
-    public function __call( $name, $arguments ) {
-        return static::__callStatic( $name, $arguments );
+    public static function getName() {
+        return __CLASS__;
     }
 
 }

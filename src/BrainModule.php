@@ -2,7 +2,6 @@
 
 use Brain\Container;
 use Brain\Module;
-use Brain\Hooks;
 
 /**
  * Brain module implementation
@@ -41,7 +40,7 @@ class BrainModule implements Module {
     }
 
     function boot( Container $c ) {
-        Hooks::setContainer( $c );
+        return;
     }
 
     function getPath() {
