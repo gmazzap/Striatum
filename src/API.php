@@ -31,7 +31,7 @@ use Brain\Striatum\SubjectsManager as Manager;
  * ##############################################################################################
  *
  * @package Brain\Striatum
- * @version 0.1
+ * @version 0.1.5
  */
 class API {
 

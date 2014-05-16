@@ -25,16 +25,12 @@
  * This is useful when the package is used inside OOP plugins, making use of dependency injection.
  *
  * @package Brain\Striatum
- * @version 0.1
+ * @version 0.1.5
  */
 class Hooks extends Facade {
 
     static function getBindId() {
         return 'hooks.api';
-    }
-
-    public static function getName() {
-        return __CLASS__;
     }
 
 }
