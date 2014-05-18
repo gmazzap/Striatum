@@ -3,6 +3,9 @@ Striatum
 
 ![Striatum][1]
 
+[![Build Status](https://api.travis-ci.org/Giuseppe-Mazzapica/Striatum.svg)](https://travis-ci.org/Giuseppe-Mazzapica/Striatum)
+
+
 Striatum is a package (not full plugin) to handle WordPress hooks OOP way.
 
 It makes use of [composer][2] to be embedded in larger projects and implements [Observer pattern][3] to deal with WordPress hooks. It takes the two pattern interfaces, [Subject][4] and [Observer][5], from PHP SPL library.
