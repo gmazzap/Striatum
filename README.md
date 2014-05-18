@@ -180,7 +180,7 @@ Striatum own code is licensed under GPLv2+. Through Composer, it install code fr
   [3]: http://en.wikipedia.org/wiki/Observer_pattern
   [4]: http://www.php.net/manual/en/class.splsubject.php
   [5]: http://www.php.net/manual/en/class.splobserver.php
-  [6]: https://github.com/Giuseppe-Mazzapica/Brain-WP-Project/blob/master/README.md#brain-wp-project
+  [6]: http://giuseppe-mazzapica.github.io/Brain
   [7]: http://codex.wordpress.org/Plugin_API
   [8]: http://www.php.net/manual/en/function.spl-object-hash.php
   [9]: http://wordpress.stackexchange.com/a/57088/35541
