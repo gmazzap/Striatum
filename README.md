@@ -10,7 +10,7 @@ Striatum is a package (not full plugin) to handle WordPress hooks OOP way.
 
 It makes use of [composer][2] to be embedded in larger projects and implements [Observer pattern][3] to deal with WordPress hooks. It takes the two pattern interfaces, [Subject][4] and [Observer][5], from PHP SPL library.
 
-It is also a [Brain][6] module.
+It is part pf a [Brain WP Project][6] module.
 
 ##Table of contents##
 
@@ -180,7 +180,7 @@ Striatum own code is licensed under GPLv2+. Through Composer, it install code fr
   [3]: http://en.wikipedia.org/wiki/Observer_pattern
   [4]: http://www.php.net/manual/en/class.splsubject.php
   [5]: http://www.php.net/manual/en/class.splobserver.php
-  [6]: https://github.com/Giuseppe-Mazzapica/Brain
+  [6]: https://github.com/Giuseppe-Mazzapica/Brain-WP-Project/blob/master/README.md#brain-wp-project
   [7]: http://codex.wordpress.org/Plugin_API
   [8]: http://www.php.net/manual/en/function.spl-object-hash.php
   [9]: http://wordpress.stackexchange.com/a/57088/35541
