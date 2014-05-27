@@ -155,7 +155,7 @@ class Hook implements HookInterface, \SplObserver, \ArrayAccess {
             throw new \InvalidArgumentException;
         }
         $times = $this->get( 'times' );
-        if ( ( $times > 0 ) && $times >= $this->times ) {
+        if ( ( $times > 0 ) && ( $this->times >= $times ) ) {
             return $subject->detach( $this );
         }
         $subject->setInfo( 'priority_now', $this->get( 'priority' ) );
