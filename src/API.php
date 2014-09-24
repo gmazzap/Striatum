@@ -36,9 +36,7 @@ use Brain\Striatum\SubjectsManager as Manager;
 class API {
 
     private $manager;
-
     private $hooks;
-
     private $hook;
 
     /**
@@ -68,11 +66,11 @@ class API {
         if ( ! is_string( $hook ) || empty( $hook ) ) {
             return new \WP_Error( 'hooks-bad-id' );
         }
-        if ( isset( $this->hooks[$hook] ) && ! $this->hooks[$hook] instanceof SubjectInterface ) {
+        if ( isset( $this->hooks[ $hook ] ) && ! $this->hooks[ $hook ] instanceof SubjectInterface ) {
             return new \WP_Error( 'hooks-bad-subject' );
         }
-        if ( ! isset( $this->hooks[$hook] ) ) return;
-        return $get_subject ? $this->hooks[$hook] : $this->hooks[$hook]->getHooksArray();
+        if ( ! isset( $this->hooks[ $hook ] ) ) return;
+        return $get_subject ? $this->hooks[ $hook ] : $this->hooks[ $hook ]->getHooksArray();
     }
 
     /**
@@ -191,7 +189,8 @@ class API {
      * @see \add_filter()
      * @since 0.1
      */
-    public function addFilter( $id = '', $hook = '', $callback = NULL, $priority = 10, $args_num = 1, $times = 0 ) {
+    public function addFilter( $id = '', $hook = '', $callback = NULL, $priority = 10,
+                               $args_num = 1, $times = 0 ) {
         $args = compact( 'callback', 'priority', 'args_num', 'times' );
         return $this->addHook( $id, $args, $hook, TRUE );
     }
@@ -218,7 +217,8 @@ class API {
      * @see \add_action()
      * @since 0.1
      */
-    public function addAction( $id = '', $hook = '', $callback = NULL, $priority = 10, $args_num = 1, $times = 0 ) {
+    public function addAction( $id = '', $hook = '', $callback = NULL, $priority = 10,
+                               $args_num = 1, $times = 0 ) {
         $args = compact( 'callback', 'priority', 'args_num', 'times' );
         return $this->addHook( $id, $args, $hook, FALSE );
     }
@@ -301,12 +301,17 @@ class API {
     public function trigger( $hook = '' ) {
         $hooks = $this->getHooks( $hook, TRUE );
         if ( ! $hooks instanceof SubjectInterface ) {
-            return $hooks;
+            if ( isset( $GLOBALS[ 'wp_filter' ][ $hook ] ) ) {
+                call_user_func_array( 'do_action', func_get_args() );
+            }
+        } else {
+            $all_args = array_values( func_get_args() );
+            $args = isset( $all_args[ 1 ] ) ? array_slice( $all_args, 1 ) : [ ];
+            $result = $hooks->notify( $args );
+            if ( $hooks->isFilter() ) {
+                return $result;
+            }
         }
-        $all_args = array_values( func_get_args() );
-        $args = isset( $all_args[1] ) ? array_slice( $all_args, 1 ) : [ ];
-        $result = $hooks->notify( $args );
-        if ( $hooks->isFilter() ) return $result;
     }
 
     /**
@@ -322,6 +327,9 @@ class API {
      */
     public function filter( $hook = '', $actual = NULL ) {
         if ( ! $this->getHooks( $hook, TRUE ) instanceof SubjectInterface ) {
+            if ( isset( $GLOBALS[ 'wp_filter' ][ $hook ] ) ) {
+                $actual = call_user_func_array( 'apply_filters', func_get_args() );
+            }
             return $actual;
         }
         return call_user_func_array( [ $this, 'trigger' ], func_get_args() );
@@ -502,19 +510,19 @@ class API {
     }
 
     private function maybeUpdateGlobal( $tag, Array $new_args, HookInterface $old ) {
-        $new_priority = isset( $new_args['priority'] ) ? $new_args['priority'] : $old->priority;
-        $new_args_num = isset( $new_args['args_num'] ) ? $new_args['args_num'] : $old->args_num;
+        $new_priority = isset( $new_args[ 'priority' ] ) ? $new_args[ 'priority' ] : $old->priority;
+        $new_args_num = isset( $new_args[ 'args_num' ] ) ? $new_args[ 'args_num' ] : $old->args_num;
         if ( (int) $new_priority !== $old->priority || (int) $new_args_num != $old->args_num ) {
             $new_priority = (int) $new_priority;
             global $wp_filter;
             $cbid = _wp_filter_build_unique_id( $tag, [ $old, 'proxy' ], $old->priority );
-            if ( ! isset( $wp_filter[$tag] ) ) return;
-            if ( ! isset( $wp_filter[$tag][$old->priority] ) ) return;
-            if ( ! isset( $wp_filter[$tag][$old->priority][$cbid] ) ) return;
-            $filter_data = $wp_filter[$tag][$old->priority][$cbid];
-            unset( $wp_filter[$tag][$old->priority][$cbid] );
-            $filter_data['accepted_args'] = (int) $new_args_num;
-            $wp_filter[$tag][$new_priority][$cbid] = $filter_data;
+            if ( ! isset( $wp_filter[ $tag ] ) ) return;
+            if ( ! isset( $wp_filter[ $tag ][ $old->priority ] ) ) return;
+            if ( ! isset( $wp_filter[ $tag ][ $old->priority ][ $cbid ] ) ) return;
+            $filter_data = $wp_filter[ $tag ][ $old->priority ][ $cbid ];
+            unset( $wp_filter[ $tag ][ $old->priority ][ $cbid ] );
+            $filter_data[ 'accepted_args' ] = (int) $new_args_num;
+            $wp_filter[ $tag ][ $new_priority ][ $cbid ] = $filter_data;
         }
     }
 
