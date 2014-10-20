@@ -78,7 +78,9 @@ This is the reason why package also comes with a **facade class**. The term is n
 
 The facade class is named `Hooks` inside Brain namespace. Using it, add an hook is as easy as:
 
-    Brain\Hooks::addAction( 'plugin.init', 'init', [ new MyPlugin, 'init' ] );
+``` php
+Brain\Hooks::addAction( 'plugin.init', 'init', [ new MyPlugin, 'init' ] );
+```
 
 `addAction` method is designed using almost same signature of core `add_action` function, so take almost same arguments. It differs for first argument that is the hook id: using `'plugin.init'`, is possible to retrieve, to edit, to remove and to debug the hook added.
 
@@ -90,36 +92,44 @@ The static facade class is easy to use, however using in that way inside other c
 To solve these problems, the easiest way is to use composition via dependency injection.
 In facts, the `Brain\Hooks` facade class can be used in dynamic way, like so:
 
-    $hooks = new Brain\Hooks;
-    $hooks->addAction( 'plugin.init', 'init', [ new MyPlugin, 'init' ] );
+``` php
+$hooks = new Brain\Hooks;
+$hooks->addAction( 'plugin.init', 'init', [ new MyPlugin, 'init' ] );
+```
     
 Looking at `Brain\Hooks` class code, you'll see there is absolutely no difference in the two methods, but using the latter is possible to inject an instance of the class inside other classes. See the following example:
 
-    class A_Plugin_Class {
+``` php
+class A_Plugin_Class {
     
-      function __construct( \Brain\Hooks $hooks ) {
-        $this->hooks = $hooks;
-      }
+  function __construct( \Brain\Hooks $hooks ) {
+    $this->hooks = $hooks;
+  }
       
-      function get_a_filtered_value( $a_value ) {
-        return $this->hooks->filter( 'a_filter', $a_value, $this );
-      }
+  function get_a_filtered_value( $a_value ) {
+    return $this->hooks->filter( 'a_filter', $a_value, $this );
+  }
       
-    }
+}
+```
 
 The method `get_a_filtered_value` makes use of `$this->hooks` property to call the Striatum API method.
 Testing the method in isolation is very simple too, an example using PHPUnit and Mockery:
 
-    class A_Plugin_Class_Test () {
+``` php
+class A_Plugin_Class_Test () {
     
-      test_get_a_filtered_value() {
-        $hooks = \Mockery::mock('\Brain\Hooks');
-        $hooks->shouldReceive( 'filter' )->once()->with( 'a_filter', 'foo' )->andReturn( 'bar' );
-        $class = new A_Plugin_Class( $hooks );
-        $this->assertEquals( 'bar', $class->get_a_filtered_value( 'foo' ) );
-      }
-      
-    }
+  test_get_a_filtered_value() {
+    $hooks = \Mockery::mock('\Brain\Hooks');
+    $hooks->shouldReceive( 'filter' )
+      ->once()
+      ->with( 'a_filter', 'foo' )
+      ->andReturn( 'bar' );
+    $class = new A_Plugin_Class( $hooks );
+    $this->assertEquals( 'bar', $class->get_a_filtered_value( 'foo' ) );
+  }
+}
+```
 
 So the method is tested in isolation, mocking the behavior of a filter: easy and straightforward.
 
