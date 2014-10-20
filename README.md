@@ -35,13 +35,19 @@ It is a [Brain Project][6] module.
 ##Quick Start##
 Striatum is very easy to use, e.g. adding an action is as easy as:
 
-    Brain\Hooks::addAction( 'myplugin.init', 'init', [ new MyPlugin, 'init' ] );
+``` php
+Brain\Hooks::addAction( 'myplugin.init', 'init', [ new MyPlugin, 'init' ] );
+```
     
 or fire a custom action or filter
 
-    Brain\Hooks::trigger( 'foo_action', $optional_arg1, $optional_arg2, $and_so_on ); // action
-    
-    $filtered = Brain\Hooks::filter( 'bar_filter', $unfiltered, $optional_arg1 ); // filter
+``` php
+// action
+Brain\Hooks::trigger( 'foo_action', $optional_1, $optional_2, $and_so_on );
+
+ // filter
+$filtered = Brain\Hooks::filter( 'bar_filter', $unfiltered, $optional_1 );
+```
 
 All the functions available through the `Brain\Hooks` API facade are documented in the API doc page. (Before teasing the *static* approach, read [here](#api)).
 
