@@ -6,14 +6,15 @@
  *
  * @package Brain\Striatum
  */
-interface SubjectInterface {
+interface SubjectInterface
+{
 
     /**
      * Set an id for the Subject. It coincides with the action/filter tag, e.g. 'init' or 'the_content'
      *
      * @param string $id
      */
-    public function setId( $id );
+    public function setId($id);
 
     /**
      * Get the id
@@ -27,21 +28,21 @@ interface SubjectInterface {
      *
      * @param \Brain\Striatum\HookInterface $hook   Hook to add
      */
-    public function add( HookInterface $hook );
+    public function add(HookInterface $hook);
 
     /**
      * Detach an Hook (observer) to the Subject
      *
      * @param \Brain\Striatum\HookInterface $hook   Hook to remove
      */
-    public function remove( HookInterface $hook );
+    public function remove(HookInterface $hook);
 
     /**
      * BucketInterface is the data structure where the added Hooks are stored.
      *
      * @param \Brain\Striatum\BucketInterface $booket
      */
-    public function setHooks( BucketInterface $booket );
+    public function setHooks(BucketInterface $booket);
 
     /**
      * Get the BucketInterface
@@ -56,7 +57,7 @@ interface SubjectInterface {
      * @param string $id    Hook to retrieve
      * @return \Brain\Striatum\HookInterface
      */
-    public function getHook( $id );
+    public function getHook($id);
 
     /**
      * Both a getter/setter for the 'is_filter' property. When $set paran is not null, acts as a
@@ -65,7 +66,7 @@ interface SubjectInterface {
      * @param bool|void $set    When not null 'is_filter' is set to this value casted to boolean
      * @return bool
      */
-    public function isFilter( $set = NULL );
+    public function isFilter($set = NULL);
 
     /**
      * Get a specific information about the Subject. E.g. the hooks running, the ones already ran,
@@ -73,7 +74,7 @@ interface SubjectInterface {
      *
      * @param string $info  The info to get
      */
-    public function getInfo( $info = NULL );
+    public function getInfo($info = NULL);
 
     /**
      * Set a specific information about the Subject. E.g. the hooks running, the ones already ran,
@@ -82,7 +83,7 @@ interface SubjectInterface {
      * @param string $info  The info to set
      * @param mixed $value  Valur to assign to the info
      */
-    public function setInfo( $info = NULL, $value = NULL );
+    public function setInfo($info = NULL, $value = NULL);
 
     /**
      * Detach all Hooks attached, so remove them from the bucket and from global $wp_filter array

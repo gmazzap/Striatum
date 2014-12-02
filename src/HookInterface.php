@@ -6,14 +6,15 @@
  *
  * @package Brain\Striatum
  */
-interface HookInterface {
+interface HookInterface
+{
 
     /**
      * Set the id of the hook instance.
      *
      * @param string $id    Set hook id
      */
-    public function setId( $id );
+    public function setId($id);
 
     /**
      * Get the id of the hook.
@@ -27,7 +28,7 @@ interface HookInterface {
      *
      * @param \Brain\Striatum\SubjectInterface $subject Hook Subject
      */
-    function setSubject( SubjectInterface $subject );
+    function setSubject(SubjectInterface $subject);
 
     /**
      * Get the hook Subject
@@ -41,7 +42,7 @@ interface HookInterface {
      *
      * @param string $index The property to get
      */
-    function get( $index = NULL );
+    function get($index = NULL);
 
     /**
      * Set an additional property of the hook, like callback, priority, and so on
@@ -49,7 +50,7 @@ interface HookInterface {
      * @param string $index The property to set
      * @param mixed $value  Value to assign to property
      */
-    function set( $index = NULL, $value = NULL );
+    function set($index = NULL, $value = NULL);
 
     /**
      * Before being added, this method validate and sanitize an array of arguments to be set as
@@ -57,7 +58,7 @@ interface HookInterface {
      *
      * @param array $args   Hook argument
      */
-    function prepare( $args );
+    function prepare($args);
 
     /**
      * Before being added and again being fired, this method check if current argumenst are valid,
