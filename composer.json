@@ -17,7 +17,7 @@
     "require": {
         "php": ">=5.4",
         "brain/brain": "~0.1.0",
-        "brain/support": "dev-master"
+        "brain/support": "~0.1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.*",
